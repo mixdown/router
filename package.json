@@ -1,0 +1,32 @@
+{
+  "name": "mixdown-router",
+  "version": "0.0.0",
+  "description": "Router for mixdown.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "tap tests/tap/*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mixdown/router.git"
+  },
+  "keywords": [
+    "mixdown",
+    "router",
+    "plugin",
+    "broadway",
+    "middleware"
+  ],
+  "dependencies": {
+    "lodash": "1.2.1",
+    "pipeline-router": "0.5.x"
+  },
+  "devDependencies": {
+    "tap": "*",
+    "mixdown-server": "0.3.x"
+  },
+  "author": "Tommy at Vast dot com",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "gitHead": "9df1d6d18bee85bb9e9c3be135924bcfbae3f57b"
+}

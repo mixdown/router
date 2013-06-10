@@ -1,0 +1,75 @@
+{
+  "app": {
+    "plugins": {
+      "router": {
+        "module": "../index.js",
+        "options": {
+          "params": {
+            "gender": "(\\w+)",
+            "age": "(\\d+)",
+            "id": "(\\d{5})"
+          },
+          "routes": {
+            "index": {
+              "method": "GET",
+              "path": "/"
+            }
+          }
+        }
+      }
+    }
+  },
+  "sites": [
+  {
+    "id": "dogs",
+    "hostmap": [ "dogsdogsdogs.com" ],
+    "plugins": {
+      "router": {
+        "options": {
+          "params": {
+            "bark": "bark-(loud|quiet)"
+          },
+          "routes": {
+            "dogs": {
+              "method": "GET",
+              "path": "/dogs/:gender/:bark/:age"
+            },
+            "dog": {
+              "method": "GET",
+              "path": "/dog/:id"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "cats",
+    "hostmap": [ "catscatscats.com" ],
+    "plugins": {
+      "router": {
+        "options": {
+          "params": {
+            "claws": "claws-(yes|no)"
+          },
+          "routes": {
+            "cats": {
+              "method": "GET",
+              "path": "/cats/:gender/:claws/:age"
+            },
+            "cat": {
+              "method": "GET",
+              "path": "/cat/:id"
+            }
+          }
+        }
+      }
+    }
+  }
+  ],
+  "server": {
+    "listen": {
+      "port": "8081"
+    }
+  }
+}

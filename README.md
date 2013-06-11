@@ -15,7 +15,12 @@ Usage
 
 HTTP server side router for mixdown.  This plugin consumes declarative route table configuration and generates routes.
 
-Mixdown configuration file.  There are 2 parts to declare.  Params is a hash of named parameters with regex matching.  There can only be one match group in the regex.  The matched value (the part in the parentheses) is the only part that will be passed to the handler.
+Mixdown configuration file.  There are 2 parts to declare.  
+
+* Params is a hash of named parameters with regex matching.  There can only be one match group in the regex.  The matched value (the part in the parentheses) is the only part that will be passed to the handler.  See the bark param below.  
+
+* Routes hash contains format strings for the routes.  These are the same as [pipeline-router](https://github.com/tommydudebreaux/pipeline-router "pipeline-router").
+
 
 ```javascript
 
@@ -92,7 +97,7 @@ var DogRouter = function() {
   };
 
   // This examples attaches route handlers to the object instance.
-  // In this case, the restfukl params are passed in a hash to the handler
+  // In this case, the restful params are passed in a hash to the handler
   this.dogs = function(restParams) {
     var req = this.req;
     var res = this.res;

@@ -126,4 +126,107 @@ module.exports = DogRouter;
 
 If you have a mixdown server running, then this should be all you need to get started.  See the units for more examples.
 
+Url Generation
+==============
+
+Since the route table should be the single source for all things routing, then it makes sense that it should be able to generate as well as interpret.  (e.g. bi-directional)
+
+To generate a route, here is an example which is disconnected from mixdown config.
+
+```javascript
+var Router = require('../tests/catrouter.js');
+var app = {
+  plugins: new (require('broadway')).App()
+};
+
+app.plugins.use(new Router(){ 
+  , app: app 
+  , params: {
+      "gender": "(\\w+)",
+      "age": "(\\d+)",
+      "id": "(\\d{1})",
+      "bark": "bark-(loud|quiet)"
+    }
+  , routes: {
+      "search": {
+        "method": "GET",
+        "path": "/dogs/:gender/:bark/:age",
+        "handler": "dogs"
+      },
+      "single": {
+        "method": "GET",
+        "path": "/dog/:id",
+        "query": [ "hidePictures" ],
+        "handler": "dog"
+      },
+      "create": {
+        "method": "POST",
+        "path": "/create/dog/:id",
+        "body": [ "gender", "age", "phone" ],
+        "handler": "create"
+      }
+    }
+});
+
+// Get the url as a node url object
+var uri = app.plugins.router.url('search', {
+  age: 6,
+  gender: 'female',
+  bark: 'quiet'
+});
+
+console.log(JSON.stringify(uri)); // ==>
+// {
+//   "protocol": null,
+//   "slashes": null,
+//   "auth": null,
+//   "host": null,
+//   "hash": null,
+//   "search": null,
+//   "query": null,
+//   "pathname": "/dogs/female/bark-loud/6",
+//   "path": null,
+//   "href": ""
+// }
+
+// Get the url as a string url
+var href = app.plugins.router.format('search', {
+  age: 6,
+  gender: 'female',
+  bark: 'quiet'
+});
+
+console.log(href);  // ==> /dogs/female/bark-quiet/6
+
+
+// Get the url as a node url object with querystring
+var uriSingle = app.plugins.router.url('single', {
+  id: 1234,
+  hidePictures: true
+});
+
+console.log(JSON.stringify(uriSingle)); // ==>
+// {
+//   "protocol": null,
+//   "slashes": null,
+//   "auth": null,
+//   "host": null,
+//   "hash": null,
+//   "search": null,
+//   "query": { hidePictures: true },
+//   "pathname": "/dog/1234",
+//   "path": null,
+//   "href": ""
+// }
+
+// Get url with querystring params
+var hrefWithQuery = app.plugins.router.format('single', {
+  id: 1234,
+  hidePictures: true
+});
+  
+console.log(hrefWithQuery);  // ==> /dog/1234?hidePictures=true
+```
+
+
 

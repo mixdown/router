@@ -4,7 +4,7 @@
   "description": "Router for mixdown.js",
   "main": "index.js",
   "scripts": {
-    "test": "tap tests/tap/*"
+    "test": "node tests/tap/init.js && node tests/tap/routetable.js && node tests/tap/urls.js"
   },
   "repository": {
     "type": "git",

@@ -10,7 +10,7 @@ _.each(server.apps, function(app, appid) {
   
   test('Test index route', function(t) {
 
-    var router = app.plugins.router();
+    var router = app.plugins.router.create();
     var req = new MockRequest({ url: '/', headers: { host: app.config.hostmap[0] }});
     var res = new MockResponse();
 
@@ -33,7 +33,7 @@ _.each(server.apps, function(app, appid) {
 
  test('Test search route', function(t) { 
 
-    var router = app.plugins.router();
+    var router = app.plugins.router.create();
     var uri = app.plugins.router.routes.search.path.replace(':gender', 'male').replace(':age', '6').replace(':claws', 'claws-no').replace(':bark', 'bark-loud');
     var req = new MockRequest({ url: uri, headers: { host: app.config.hostmap[0] }});
     var res = new MockResponse();
@@ -65,7 +65,7 @@ _.each(server.apps, function(app, appid) {
 
  test('Test single route', function(t) { 
 
-    var router = app.plugins.router();
+    var router = app.plugins.router.create();
     var uri = app.plugins.router.routes.single.path.replace(':id', '3');
     var req = new MockRequest({ url: uri, headers: { host: app.config.hostmap[0] }});
     var res = new MockResponse();

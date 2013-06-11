@@ -124,6 +124,6 @@ module.exports = DogRouter;
 
 ```
 
-If you have a mixdown server running, then this should be all you need to get started.  
+If you have a mixdown server running, then this should be all you need to get started.  See the units for more examples.
 
 

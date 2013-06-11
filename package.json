@@ -23,7 +23,8 @@
   },
   "devDependencies": {
     "tap": "*",
-    "mixdown-server": "0.3.x"
+    "mixdown-server": "0.3.x",
+    "hammock": "*"
   },
   "author": "Tommy at Vast dot com",
   "license": "MIT",

@@ -2,17 +2,17 @@
   "app": {
     "plugins": {
       "router": {
-        "module": "../index.js",
         "options": {
           "params": {
             "gender": "(\\w+)",
             "age": "(\\d+)",
-            "id": "(\\d{5})"
+            "id": "(\\d{1})"
           },
           "routes": {
             "index": {
               "method": "GET",
-              "path": "/"
+              "path": "/",
+              "handler": "index"
             }
           }
         }
@@ -25,18 +25,28 @@
     "hostmap": [ "dogsdogsdogs.com" ],
     "plugins": {
       "router": {
+        "module": "/tests/dogrouter.js",
         "options": {
           "params": {
             "bark": "bark-(loud|quiet)"
           },
           "routes": {
-            "dogs": {
+            "search": {
               "method": "GET",
-              "path": "/dogs/:gender/:bark/:age"
+              "path": "/dogs/:gender/:bark/:age",
+              "handler": "dogs"
             },
-            "dog": {
+            "single": {
               "method": "GET",
-              "path": "/dog/:id"
+              "path": "/dog/:id",
+              "query": [ "hidePictures" ],
+              "handler": "dog"
+            },
+            "create": {
+              "method": "POST",
+              "path": "/create/dog/:id",
+              "body": [ "gender", "age", "phone" ],
+              "handler": "create"
             }
           }
         }
@@ -48,18 +58,21 @@
     "hostmap": [ "catscatscats.com" ],
     "plugins": {
       "router": {
+        "module": "/tests/catrouter.js",
         "options": {
           "params": {
             "claws": "claws-(yes|no)"
           },
           "routes": {
-            "cats": {
+            "search": {
               "method": "GET",
-              "path": "/cats/:gender/:claws/:age"
+              "path": "/cats/:gender/:claws/:age",
+              "handler": "cats"
             },
-            "cat": {
+            "single": {
               "method": "GET",
-              "path": "/cat/:id"
+              "path": "/cat/:id",
+              "handler": "cat"
             }
           }
         }
@@ -70,6 +83,21 @@
   "server": {
     "listen": {
       "port": "8081"
+    },
+    "logger": {
+        "defaults": {
+            "handleExceptions": false,
+            "json": false,
+            "timestamp": true,
+            "colorize": true,
+            "prettyPrint": true
+        },
+        "transports": [{
+            "transport": "Console",
+            "options": {
+                "level": "info"
+            }
+        }]
     }
   }
 }

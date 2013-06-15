@@ -1,6 +1,5 @@
 var _ = require('lodash');
-var tap = require('tap');
-var test = tap.test;
+var test = require('tape').test;
 var server = require('../fixture.js');
 
 _.each(server.apps, function(app, appid) {
@@ -14,7 +13,7 @@ _.each(server.apps, function(app, appid) {
   test('Create router instance', function(t) {
     var router = app.plugins.router.create();
     t.ok(router, 'Router instance exists'); 
-    t.type(router.dispatch, 'function', 'router.dispatch should be a function.');
+    t.equal(typeof(router.dispatch), 'function', 'router.dispatch should be a function.');
     t.equal(router.params.length, 4, 'Should contain 4 params');
     t.end();   
   })

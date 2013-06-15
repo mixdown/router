@@ -1,6 +1,5 @@
 var _ = require('lodash');
-var tap = require('tap');
-var test = tap.test;
+var test = require('tape').test;
 var util = require('util');
 var server = require('../fixture.js');
 var MockRequest = require('hammock').Request;

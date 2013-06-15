@@ -1,6 +1,5 @@
 var _ = require('lodash');
-var tap = require('tap');
-var test = tap.test;
+var test = require('tape').test;
 var server = require('../fixture.js');
 
 _.each(server.apps, function(app, appid) {

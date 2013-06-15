@@ -19,19 +19,16 @@ var searchDogs = function(age, gender, bark) {
 var DogRouter = function() {
   Router.apply(this, arguments);
 
-  this.index = function() {
-    var app = this.app;
-    var req = this.req;
-    var res = this.res;
+  this.index = function(httpContext) {
+    var res = httpContext.response;
 
     res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Welcome to ' + app.id + ' search');
+    res.end('Welcome to ' + httpContext.app.id + ' search');
   };
 
-  this.dogs = function(restParams) {
-    var req = this.req;
-    var res = this.res;
-    var results = searchDogs(restParams.age, restParams.gender, restParams.bark);
+  this.dogs = function(httpContext) {
+    var res = httpContext.response;
+    var results = searchDogs(httpContext.params.age, httpContext.params.gender, httpContext.params.bark);
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(results));
@@ -40,10 +37,9 @@ var DogRouter = function() {
 };
 util.inherits(DogRouter, Router);
 
-DogRouter.prototype.dog = function(restParams) {
-  var req = this.req;
-  var res = this.res;
-  var results = _.find(dogList, function(d) { return d.id == restParams.id; });
+DogRouter.prototype.dog = function(httpContext) {
+  var res = httpContext.response;
+  var results = _.find(dogList, function(d) { return d.id == httpContext.params.id; });
 
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(results));

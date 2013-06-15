@@ -9,16 +9,12 @@ var Router = function() {
 
 var baseHandler = function() {
   var handler = Array.prototype.slice.call(arguments, 0)[0];
-  var req = Array.prototype.slice.call(arguments, 1)[0];
-  var res = Array.prototype.slice.call(arguments, 2)[0];
+  var httpContext = Array.prototype.slice.call(arguments, 1)[0];
 
-  var context = {
-    app: this,
-    req: req,
-    res: res
-  };
+  var context = _.clone(httpContext);
+  context.app = this;
 
-  handler.call(context, req.params);
+  handler.call(context, context);
 
 };
 

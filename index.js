@@ -38,14 +38,39 @@ Router.prototype.attach = function (options) {
     **/
     create: function() {
       var newRouter = new plRouter();
+      
+      var addParam = function (param, key) {
+        if (!param || !param.regex) {
+          throw new Error('regex missing for param: ' + key);
+        }
+        else if (!param.kind) {
+          throw new Error('kind missing for param: ' + key);
+        }
 
-      _.each(options.params, function(regex, key) {
-        newRouter.param(key, new RegExp(regex));
-      });
+        if (param.kind === "rest") {
+          newRouter.param(key, new RegExp(param.regex));
+        }
+        else if (param.kind === 'query') {
+          newRouter.qparam(key, new RegExp(param.regex));
+        }
+        else {
+          throw new Error('unknown param type: ' + param.kind);
+        }
+      };
 
-      _.each(options.routes, function(route, key) {
+      // add top-level params
+      _.each(options.params, addParam);
+
+      // add routes
+      _.each(options.routes, function (route, key) {
+
+        // add route-level params
+        if (route.params) {
+          _.each(route.params, addParam);
+        }
 
         var handler = handlers[route.handler];
+
         if (!_.isFunction(handler)) {
           handler = handlers.constructor.prototype[route.handler];
         }
@@ -72,48 +97,54 @@ Router.prototype.attach = function (options) {
       uri.port = routeObject.port;
 
       // map the param fields to querystring as defined in route.
-      if (routeObject.query) {
+      var queryParams = {};
+      var restParams = {};
+
+      // split params into rest/query
+      _.each(routeObject.params, function (param, key) {
+        if (param.kind === 'rest') {
+          restParams[key] = param;
+        }
+        else if (param.kind === 'query') {
+          queryParams[key] = param;
+        }
+      });
+
+      if (!_.isEmpty(queryParams)) {
         uri.query = {};
 
-        _.each(routeObject.query, function(q) {
-
-          if (params[q] !== null ) {
-            uri.query[q] = params[q];
+        _.each(queryParams, function (param, key) {
+          if (params[key]) {
+            // replace capturing group with value
+            uri.query[key] = param.regex.replace(/\(.*\)/, params[key]);
           }
         });
       }
 
       // build the pathname.  
       uri.pathname = '';    
-      var regexSplit = /(\?|\/)([^\?^\/]+)/g;
-      var restParams = routeObject.path.match(regexSplit);
-
-      if (!restParams || restParams.length === 0) {
-          restParams = [routeObject.path];
-      }
+      
+      // get url segments
+      // drop first element in array, since a leading slash creates an empty segment
+      var urlSegments = _.rest(routeObject.path.split('/'));
 
       // replace named params with corresponding values and generate uri
-      _.each(restParams, function(str, i) {
-          var paramConfig = null;
+      _.each(urlSegments, function (segment, i) {
+        // is this a REST segment?
+        if (/^\??:/.test(segment)) {
+          // replace with param value if available.
+          var pName = segment.replace(/^\??:/, '');
+          var pConfig = restParams[pName];
 
-          // find the corresponding parameter in param list.
-          _.each(options.params, function(rx, name) { 
-            if (!paramConfig && str.substring(1) === ':' + name) {
-              paramConfig = {
-                name: name,
-                format: rx
-              };
-            }
-          });
-
-          // now that we have the param spec, we can put the value in the format string.
-          if (paramConfig) {
-            var val = params[paramConfig.name];
-            uri.pathname += '/' + paramConfig.format.replace(/\(.*\)/, val);
+          if (pConfig && pConfig.kind === 'rest') {
+            // this is a rest param. replace the capturing group with our value.
+            uri.pathname += '/' + pConfig.regex.replace(/\(.*\)/, params[pName]);
           }
-          else {
-            uri.pathname += str;
-          }
+        }
+        else {
+          // just append
+          uri.pathname += '/' + segment;
+        }
       });
 
       return uri;

@@ -14,7 +14,7 @@ _.each(server.apps, function(app, appid) {
     var router = app.plugins.router.create();
     t.ok(router, 'Router instance exists'); 
     t.equal(typeof(router.dispatch), 'function', 'router.dispatch should be a function.');
-    t.equal(router.params.length, 4, 'Should contain 4 params');
+    t.ok(router.params.length, 'Should contain some params');
     t.end();   
   })
 });

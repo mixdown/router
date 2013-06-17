@@ -12,6 +12,7 @@ _.each(server.apps, function(app, appid) {
         gender: 'female',
         bark: 'loud'
       };
+
       var uri = app.plugins.router.url('search', params);
       var url = app.plugins.router.format('search', params);
       var gold = {
@@ -30,11 +31,12 @@ _.each(server.apps, function(app, appid) {
         hidePictures: true,
         id: 1234
       };
+
       var uri = app.plugins.router.url('single', params);
       var url = app.plugins.router.format('single', params);
       var gold = {
         pathname: '/dog/1234',
-        query: { hidePictures: true }
+        query: { hidePictures: 'true' }
       };
       var goldUrl = '/dog/1234?hidePictures=true';
 

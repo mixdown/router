@@ -3,11 +3,6 @@
     "plugins": {
       "router": {
         "options": {
-          "params": {
-            "gender": "(\\w+)",
-            "age": "(\\d+)",
-            "id": "(\\d{1})"
-          },
           "routes": {
             "index": {
               "method": "GET",
@@ -27,32 +22,61 @@
       "router": {
         "module": "/tests/dogrouter.js",
         "options": {
-          "params": {
-            "bark": "bark-(loud|quiet)"
-          },
           "routes": {
             "search": {
               "method": "GET",
               "path": "/dogs/:gender/:bark/:age",
-              "handler": "dogs"
+              "handler": "dogs",
+              "params": {
+                "bark": {
+                  "regex": "bark-(loud|quiet)",
+                  "kind": "rest"
+                },
+                "gender": {
+                  "regex": "(\\w+)",
+                  "kind": "rest"
+                },
+                "age": {
+                  "regex": "(\\d+)",
+                  "kind": "rest"
+                }
+              }
             },
+
             "single": {
               "method": "GET",
               "path": "/dog/:id",
-              "query": [ "hidePictures" ],
-              "handler": "dog"
+              "handler": "dog",
+              "params": {
+                "hidePictures": {
+                  "kind": "query",
+                  "regex": "(true|false)"
+                },
+                "id": {
+                  "regex": "(\\d{1})",
+                  "kind": "rest"
+                }
+              }
             },
+
             "create": {
               "method": "POST",
               "path": "/create/dog/:id",
               "body": [ "gender", "age", "phone" ],
-              "handler": "create"
+              "handler": "create",
+              "params": {
+                "id": {
+                  "kind": "rest",
+                  "regex": "(\\d{1})"
+                }
+              }
             }
           }
         }
       }
     }
   },
+  
   {
     "id": "cats",
     "hostmap": [ "catscatscats.com" ],
@@ -60,19 +84,36 @@
       "router": {
         "module": "/tests/catrouter.js",
         "options": {
-          "params": {
-            "claws": "claws-(yes|no)"
-          },
           "routes": {
             "search": {
               "method": "GET",
               "path": "/cats/:gender/:claws/:age",
-              "handler": "cats"
+              "handler": "cats",
+              "params": {
+                "claws": {
+                  "regex": "claws-(yes|no)",
+                  "kind": "rest"
+                },
+                "gender": {
+                  "regex": "(\\w+)",
+                  "kind": "rest"
+                },
+                "age": {
+                  "regex": "(\\d+)",
+                  "kind": "rest"
+                }
+              }
             },
             "single": {
               "method": "GET",
               "path": "/cat/:id",
-              "handler": "cat"
+              "handler": "cat",
+              "params": {
+                "id": {
+                  "regex": "(\\d{1})",
+                  "kind": "rest"
+                }
+              }
             }
           }
         }
@@ -85,19 +126,19 @@
       "port": "8081"
     },
     "logger": {
-        "defaults": {
-            "handleExceptions": false,
-            "json": false,
-            "timestamp": true,
-            "colorize": true,
-            "prettyPrint": true
-        },
-        "transports": [{
-            "transport": "Console",
-            "options": {
-                "level": "info"
-            }
-        }]
+      "defaults": {
+        "handleExceptions": false,
+        "json": false,
+        "timestamp": true,
+        "colorize": true,
+        "prettyPrint": true
+      },
+      "transports": [{
+        "transport": "Console",
+        "options": {
+          "level": "info"
+        }
+      }]
     }
   }
 }

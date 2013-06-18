@@ -10,13 +10,14 @@ var Router = function() {
 
 var baseHandler = function() {
   var handler = Array.prototype.slice.call(arguments, 0)[0];
-  var httpContext = Array.prototype.slice.call(arguments, 1)[0];
+  var route = Array.prototype.slice.call(arguments, 1)[0];
+  var httpContext = Array.prototype.slice.call(arguments, 2)[0];
 
   var context = _.clone(httpContext);
   context.app = this;
+  context.route = route;
 
   handler.call(context, context);
-
 };
 
 /**
@@ -74,7 +75,7 @@ Router.prototype.attach = function (options) {
         }
 
         if (_.isFunction(handler)) {
-          newRouter.use(route.method, route.path, _.bind(baseHandler, app, handler));
+          newRouter.use(route.method, route.path, _.bind(baseHandler, app, handler, route));
         }
 
       });

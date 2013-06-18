@@ -49,6 +49,9 @@ Router.prototype.attach = function (options) {
           throw new Error('kind missing for param: ' + key);
         }
 
+        // HACK: remove this when analytics api is done.
+        param.regex = param.regex.replace(/^\^/, '').replace(/\$$/, '');
+
         if (param.kind === "rest") {
           newRouter.param(key, new RegExp(param.regex));
         }

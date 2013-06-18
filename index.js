@@ -2,6 +2,7 @@ var _ = require('lodash');
 var plRouter = require('pipeline-router');
 var util = require('util');
 var url = require('url');
+var querystring = require('querystring');
 
 var Router = function() {
   this.name = 'router';
@@ -93,6 +94,7 @@ Router.prototype.attach = function (options) {
       var routeObject = options.routes[route];
 
       // if these are set on the route, then attach them.  This will allow injection of FQ urls.
+      uri.protocol = routeObject.protocol;      
       uri.hostname = routeObject.hostname;      
       uri.port = routeObject.port;
 
@@ -146,6 +148,10 @@ Router.prototype.attach = function (options) {
           uri.pathname += '/' + segment;
         }
       });
+
+      uri.search = '?' + querystring.stringify(uri.query);
+      uri.path = uri.pathname + uri.search;
+      uri.host = uri.hostname + (uri.port ? ':' + uri.port : '');
 
       return uri;
     }

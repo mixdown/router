@@ -59,9 +59,6 @@ Router.prototype.attach = function (options) {
         }
       };
 
-      // add top-level params
-      _.each(options.params, addParam);
-
       // add routes
       _.each(options.routes, function (route, key) {
 
@@ -149,9 +146,9 @@ Router.prototype.attach = function (options) {
         }
       });
 
-      uri.search = '?' + querystring.stringify(uri.query);
+      uri.search = uri.query ? '?' + querystring.stringify(uri.query) : null;
       uri.path = uri.pathname + uri.search;
-      uri.host = uri.hostname + (uri.port ? ':' + uri.port : '');
+      uri.host = uri.hostname ?  (uri.hostname + (uri.port ? ':' + uri.port : '')) : null;
 
       return uri;
     }
@@ -168,7 +165,6 @@ Router.prototype.attach = function (options) {
 
   };
   this.router.routes = options.routes;
-  this.router.params = options.params;
 };
 
 module.exports = Router;

@@ -60,7 +60,7 @@ Router.prototype.attach = function (options) {
       };
 
       // add routes
-      _.each(options.routes, function (route, key) {
+      _.each(router.routes, function (route, key) {
 
         // add route-level params
         if (route.params) {
@@ -88,12 +88,12 @@ Router.prototype.attach = function (options) {
     **/
   , url: function(route, params) {
       var uri = url.parse('');
-      var routeObject = options.routes[route];
+      var routeObject = router.routes[route];
 
       // if these are set on the route, then attach them.  This will allow injection of FQ urls.
-      uri.protocol = routeObject.protocol;      
-      uri.hostname = routeObject.hostname;      
-      uri.port = routeObject.port;
+      uri.protocol = routeObject.protocol || null;      
+      uri.hostname = routeObject.hostname || null;      
+      uri.port = routeObject.port || null;
 
       // map the param fields to querystring as defined in route.
       var queryParams = {};
@@ -147,7 +147,7 @@ Router.prototype.attach = function (options) {
       });
 
       uri.search = uri.query ? '?' + querystring.stringify(uri.query) : null;
-      uri.path = uri.pathname + uri.search;
+      uri.path = uri.pathname + (uri.search || '');
       uri.host = uri.hostname ?  (uri.hostname + (uri.port ? ':' + uri.port : '')) : null;
 
       return uri;

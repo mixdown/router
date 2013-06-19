@@ -42,24 +42,15 @@ Router.prototype.attach = function (options) {
       var newRouter = new plRouter();
       
       var addParam = function (param, key) {
-        if (!param || !param.regex) {
-          throw new Error('regex missing for param: ' + key);
-        }
-        else if (!param.kind) {
-          throw new Error('kind missing for param: ' + key);
-        }
 
-        // HACK: remove this when analytics api is done.
-        param.regex = param.regex.replace(/^\^/, '').replace(/\$$/, '');
+        if (param && param.regex && /(rest|query)/i.test(param.kind)) {
 
-        if (param.kind === "rest") {
-          newRouter.param(key, new RegExp(param.regex));
-        }
-        else if (param.kind === 'query') {
-          newRouter.qparam(key, new RegExp(param.regex));
-        }
-        else {
-          throw new Error('unknown param type: ' + param.kind);
+          if (param.kind.toLowerCase() === "rest") {
+            newRouter.param(key, new RegExp(param.regex));
+          }
+          else if (param.kind.toLowerCase() === 'query') {
+            newRouter.qparam(key, new RegExp(param.regex));
+          }
         }
       };
 
@@ -98,6 +89,7 @@ Router.prototype.attach = function (options) {
       uri.protocol = routeObject.protocol || null;      
       uri.hostname = routeObject.hostname || null;      
       uri.port = routeObject.port || null;
+      uri.method = routeObject.method || null;
 
       // map the param fields to querystring as defined in route.
       var queryParams = {};
@@ -114,12 +106,13 @@ Router.prototype.attach = function (options) {
       });
 
       if (!_.isEmpty(queryParams)) {
-        uri.query = {};
 
         _.each(queryParams, function (param, key) {
-          if (params[key]) {
+          if (params[key] || param.default) {
+            uri.query = uri.query || {};
+
             // replace capturing group with value
-            uri.query[key] = param.regex.replace(/\(.*\)/, params[key]);
+            uri.query[key] = param.regex.replace(/\(.*\)/, params[key] || param.default);
           }
         });
       }
@@ -141,7 +134,7 @@ Router.prototype.attach = function (options) {
 
           if (pConfig && pConfig.kind === 'rest') {
             // this is a rest param. replace the capturing group with our value.
-            uri.pathname += '/' + pConfig.regex.replace(/\(.*\)/, params[pName]);
+            uri.pathname += '/' + pConfig.regex.replace(/\(.*\)/, params[pName] || pConfig.default );
           }
         }
         else {

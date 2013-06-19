@@ -43,7 +43,7 @@ Router.prototype.attach = function (options) {
       
       var addParam = function (param, key) {
 
-        if (param && param.regex && /(rest|query)/i.test(param.kind)) {
+        if (param && param.regex) {
 
           if (param.kind.toLowerCase() === "rest") {
             newRouter.param(key, new RegExp(param.regex));
@@ -108,11 +108,16 @@ Router.prototype.attach = function (options) {
       if (!_.isEmpty(queryParams)) {
 
         _.each(queryParams, function (param, key) {
+
           if (params[key] || param.default) {
             uri.query = uri.query || {};
 
             // replace capturing group with value
-            uri.query[key] = param.regex.replace(/\(.*\)/, params[key] || param.default);
+            var qval = (param.enabled && params[key]) ? params[key] : param.default;
+            if (qval) {
+              uri.query[key] = param.regex.replace(/\(.*\)/, qval);
+            }
+
           }
         });
       }
@@ -126,18 +131,25 @@ Router.prototype.attach = function (options) {
 
       // replace named params with corresponding values and generate uri
       _.each(urlSegments, function (segment, i) {
+
         // is this a REST segment?
         if (/^\??:/.test(segment)) {
+
           // replace with param value if available.
           var pName = segment.replace(/^\??:/, '');
           var pConfig = restParams[pName];
 
           if (pConfig && pConfig.kind === 'rest') {
+
             // this is a rest param. replace the capturing group with our value.
-            uri.pathname += '/' + pConfig.regex.replace(/\(.*\)/, params[pName] || pConfig.default );
+            var pval = (pConfig.enabled && params[pName]) ? params[pName] : pConfig.default;
+            if (pval) {
+              uri.pathname += '/' + pConfig.regex.replace(/\(.*\)/, pval);
+            }
           }
         }
         else {
+
           // just append
           uri.pathname += '/' + segment;
         }

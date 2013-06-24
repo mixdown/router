@@ -27,29 +27,54 @@ Mixdown configuration file.  There are 2 parts to declare.
 "router": {
   "module": "/tests/dogrouter.js",
   "options": {
-    "params": {
-      "gender": "(\\w+)",
-      "age": "(\\d+)",
-      "id": "(\\d{1})",
-      "bark": "bark-(loud|quiet)"
-    },
     "routes": {
       "search": {
         "method": "GET",
         "path": "/dogs/:gender/:bark/:age",
-        "handler": "dogs"
+        "handler": "dogs",
+        "params": {
+          "bark": {
+            "regex": "bark-(loud|quiet)",
+            "kind": "rest"
+          },
+          "gender": {
+            "regex": "(\\w+)",
+            "kind": "rest"
+          },
+          "age": {
+            "regex": "(\\d+)",
+            "kind": "rest"
+          }
+        }
       },
+
       "single": {
         "method": "GET",
         "path": "/dog/:id",
-        "query": [ "hidePictures" ],
-        "handler": "dog"
+        "handler": "dog",
+        "params": {
+          "hidePictures": {
+            "kind": "query",
+            "regex": "(true|false)"
+          },
+          "id": {
+            "regex": "(\\d{1})",
+            "kind": "rest"
+          }
+        }
       },
+
       "create": {
         "method": "POST",
         "path": "/create/dog/:id",
         "body": [ "gender", "age", "phone" ],
-        "handler": "create"
+        "handler": "create",
+        "params": {
+          "id": {
+            "kind": "rest",
+            "regex": "(\\d{1})"
+          }
+        }
       }
     }
   }

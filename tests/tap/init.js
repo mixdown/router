@@ -11,6 +11,7 @@ _.each(server.apps, function(app, appid) {
 
 
   test('Create router instance', function(t) {
+    console.log(require('util').inspect(app.plugins.router));
     var router = app.plugins.router.create();
     t.ok(router, 'Router instance exists'); 
     t.equal(typeof(router.dispatch), 'function', 'router.dispatch should be a function.');

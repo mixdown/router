@@ -30,15 +30,18 @@
               "params": {
                 "bark": {
                   "regex": "bark-(loud|quiet)",
-                  "kind": "rest"
+                  "kind": "rest",
+                  "enabled": true
                 },
                 "gender": {
                   "regex": "(\\w+)",
-                  "kind": "rest"
+                  "kind": "rest",
+                  "enabled": true
                 },
                 "age": {
                   "regex": "(\\d+)",
-                  "kind": "rest"
+                  "kind": "rest",
+                  "enabled": true
                 }
               }
             },
@@ -50,11 +53,13 @@
               "params": {
                 "hidePictures": {
                   "kind": "query",
-                  "regex": "(true|false)"
+                  "regex": "(true|false)",
+                  "enabled": true
                 },
                 "id": {
                   "regex": "(\\d{1})",
-                  "kind": "rest"
+                  "kind": "rest",
+                  "enabled": true
                 }
               }
             },
@@ -67,7 +72,8 @@
               "params": {
                 "id": {
                   "kind": "rest",
-                  "regex": "(\\d{1})"
+                  "regex": "(\\d{1})",
+                  "enabled": true
                 }
               }
             }
@@ -92,15 +98,18 @@
               "params": {
                 "claws": {
                   "regex": "claws-(yes|no)",
-                  "kind": "rest"
+                  "kind": "rest",
+                  "enabled": true
                 },
                 "gender": {
                   "regex": "(\\w+)",
-                  "kind": "rest"
+                  "kind": "rest",
+                  "enabled": true
                 },
                 "age": {
                   "regex": "(\\d+)",
-                  "kind": "rest"
+                  "kind": "rest",
+                  "enabled": true
                 }
               }
             },
@@ -111,7 +120,8 @@
               "params": {
                 "id": {
                   "regex": "(\\d{1})",
-                  "kind": "rest"
+                  "kind": "rest",
+                  "enabled": true
                 }
               }
             }

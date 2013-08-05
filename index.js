@@ -43,6 +43,10 @@ Router.prototype.attach = function (options) {
     **/
     create: function() {
       var newRouter = new plRouter();
+
+      if (options.timeout) {
+        newRouter.timeout = options.timeout;
+      }
       
       var addParam = function (param, key) {
 
@@ -72,7 +76,7 @@ Router.prototype.attach = function (options) {
         }
 
         if (_.isFunction(handler)) {
-          newRouter.use(route.method, route.path, _.bind(baseHandler, app, handler, route));
+          newRouter.use(route.method, route.path, { timeout: route.timeout }, _.bind(baseHandler, app, handler, route));
         }
 
       });

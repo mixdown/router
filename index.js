@@ -9,20 +9,20 @@ var Router = function() {
   this.name = 'router';
 };
 
-var baseHandler = function() {
-  var handler = Array.prototype.slice.call(arguments, 0)[0];
-  var route = Array.prototype.slice.call(arguments, 1)[0];
-  var httpContext = Array.prototype.slice.call(arguments, 2)[0];
+Router.prototype._baseHandler = function() {
+  var handler = arguments[0];
+  var route = arguments[1];
+  var httpContext = arguments[2];
 
   var context = _.clone(httpContext);
   context.app = this;
   context.route = route;
 
-  handler.call(context, context);
+  handler.call(this, context);
 };
 
 /**
-* Attaches an autos router plugin to an application.
+* Attaches a router plugin to an application.
 *
 **/ 
 Router.prototype.attach = function (options) {
@@ -76,7 +76,12 @@ Router.prototype.attach = function (options) {
         }
 
         if (_.isFunction(handler)) {
-          newRouter.use(route.method, route.path, { timeout: route.timeout }, _.bind(baseHandler, app, handler, route));
+          newRouter.use(
+            route.method, 
+            route.path, 
+            { timeout: route.timeout }, 
+            handlers.constructor.prototype._baseHandler.bind(app, handler, route)
+          );
         }
 
       });

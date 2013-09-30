@@ -4,7 +4,9 @@
   "description": "Router for mixdown.js",
   "main": "index.js",
   "scripts": {
-    "test": "tape tests/tap/*"
+    "test": "tape tests/tap/*",
+    "postinstall": "lodash include=each,cloneDeep,isEmpty exports=node",
+    "preinstall": "npm install lodash-cli -g"
   },
   "repository": {
     "type": "git",
@@ -18,11 +20,11 @@
     "middleware"
   ],
   "dependencies": {
-    "lodash": "~2.2.0",
     "pipeline-router": "~1.1.1",
     "hammock": "~0.1.1"
   },
   "devDependencies": {
+    "lodash": "~2.2.0",
     "tape": "*",
     "mixdown-server": "0.3.x"
   },

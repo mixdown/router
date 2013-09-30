@@ -19,12 +19,12 @@
   ],
   "dependencies": {
     "lodash": "~2.2.0",
-    "pipeline-router": "~1.1.0"
+    "pipeline-router": "~1.1.0",
+    "hammock": "~0.1.0"
   },
   "devDependencies": {
     "tape": "*",
-    "mixdown-server": "0.3.x",
-    "hammock": "0.1.x"
+    "mixdown-server": "0.3.x"
   },
   "author": "Tommy at Vast dot com",
   "license": "MIT",

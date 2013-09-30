@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "tape tests/tap/*",
-    "postinstall": "lodash include=each,cloneDeep,isEmpty exports=node",
-    "preinstall": "npm install lodash-cli -g"
+    "postinstall": "lodash include=each,cloneDeep,isEmpty exports=node && rm -rf node_modules/lodash-cli",
+    "preinstall": "npm install lodash-cli"
   },
   "repository": {
     "type": "git",

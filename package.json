@@ -18,8 +18,8 @@
     "middleware"
   ],
   "dependencies": {
-    "lodash": "1.2.1",
-    "pipeline-router": "1.0.x"
+    "lodash": "~1.2.1",
+    "pipeline-router": "~1.0.4"
   },
   "devDependencies": {
     "tape": "*",

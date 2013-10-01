@@ -1,4 +1,4 @@
-var _ = require('./lodash.custom.min.js');
+var _ = require('lodash');
 var plRouter = require('pipeline-router');
 var util = require('util');
 var url = require('url');

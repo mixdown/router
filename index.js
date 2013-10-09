@@ -20,7 +20,8 @@ var Router = function(namespace) {
     var handlers = options.handlers || instance;
 
     // attach the generator part of the router.
-    app.plugins.use(new Generator(namespace), options);
+    Generator.constructor.call(instance, namespace);
+    Generator.prototype.attach.call(this, options);
 
     var self = this[namespace];
     var _clientRouter = null;

@@ -19,3 +19,28 @@ _.each(server.apps, function(app, appid) {
     t.end();   
   })
 });
+
+test('invalid route should cause init error', function(t){
+
+  var Router = require('../../index.js')
+  var app = {};
+  var routerPlug = new Router('router');
+  var routeName = 'asdfasdfasdf' //make it a weird name to test the message
+  var options = {
+    'routes':{
+      routeName:{
+        'path':'/',
+        'method':'GET',
+        'handler':'nonexistant'
+      }
+    }
+  };
+
+  routerPlug.attach.call(app,options);
+  
+  routerPlug.init.call(app,function(err){
+    t.ok(err,'an error should be returned');
+    t.equals(err.message.indexOf(routeName),-1,'the error should contain the name of the route');
+    t.end();
+  });
+});

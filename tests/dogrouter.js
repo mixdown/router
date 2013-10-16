@@ -45,4 +45,9 @@ DogRouter.prototype.dog = function(httpContext) {
   res.end(JSON.stringify(results));
 };
 
+DogRouter.prototype.create = function(httpContext){
+  res.writeHead(200,{'Content-Type':'text/plain'});
+  res.end('stub');
+}
+
 module.exports = DogRouter;

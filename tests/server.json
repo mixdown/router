@@ -24,6 +24,7 @@
         "options": {
           "routes": {
             "search": {
+              "name":"search",
               "method": "GET",
               "path": "/dogs/:gender/:bark/:age",
               "handler": "dogs",
@@ -47,6 +48,7 @@
             },
 
             "single": {
+              "name":"single",
               "method": "GET",
               "path": "/dog/:id",
               "handler": "dog",
@@ -65,6 +67,7 @@
             },
 
             "create": {
+              "name":"create",
               "method": "POST",
               "path": "/create/dog/:id",
               "body": [ "gender", "age", "phone" ],

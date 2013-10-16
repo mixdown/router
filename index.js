@@ -78,17 +78,7 @@ var Router = function(namespace) {
           );
         }
         else {
-          var replacementHandler = function(httpContext) {
-            httpContext.response.statusCode = 500;
-            httpContext.response.end('invalid route handler');
-          }
-          //there is a bad route, at least give a warning
-          newRouter.use(
-            route.method, 
-            route.path, 
-            { timeout: route.timeout }, 
-            handlers.constructor.prototype._baseHandler.bind(app, replacementHandler, route)
-          );
+          throw new Error('invalid handler for route: ' + route.name);
         }
       });
 
@@ -185,6 +175,20 @@ var Router = function(namespace) {
 
       return req;
     };
+  };
+
+  this.init = function(done) {
+    var self = this[namespace];
+    try{
+      var attempt = self.create();  
+    }
+    catch(err){
+      console.log(err)
+      done(err);
+      return;
+    }
+
+    done(null,self);
   };
 };
 

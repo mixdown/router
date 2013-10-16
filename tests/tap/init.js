@@ -25,22 +25,44 @@ test('invalid route should cause init error', function(t){
   var Router = require('../../index.js')
   var app = {};
   var routerPlug = new Router('router');
-  var routeName = 'asdfasdfasdf' //make it a weird name to test the message
+  var routeName1 = 'asdfasdfasdf' //make it a weird name to test the message
+  var routeName2 = 'alsobad';
+  var goodRouteName = 'good'
   var options = {
     'routes':{
-      routeName:{
+      routeName1:{
+        'name':routeName1,
         'path':'/',
         'method':'GET',
         'handler':'nonexistant'
+      },
+      routeName2:{
+        'name':routeName2,
+        'path':'/',
+        'method':'GET',
+        'handler':'nonexistant'
+      },
+      goodRouteName:{
+        'name':goodRouteName,
+        'path':'/',
+        'method':'GET',
+        'handler':'goodhandler'
       }
     }
   };
 
+  routerPlug.goodhandler = function(h) {
+
+  }
+
   routerPlug.attach.call(app,options);
+  
   
   routerPlug.init.call(app,function(err){
     t.ok(err,'an error should be returned');
-    t.equals(err.message.indexOf(routeName),-1,'the error should contain the name of the route');
+    t.notEquals(err.message.indexOf(routeName1),-1,'the error should contain the name of the first bad route');
+    t.notEquals(err.message.indexOf(routeName2),-1,'the error should contain the name of the second bad route');
+    t.equals(err.message.indexOf(goodRouteName),-1,'the error should not contain the name of the good route');
     t.end();
   });
 });

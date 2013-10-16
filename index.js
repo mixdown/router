@@ -57,6 +57,8 @@ var Router = function(namespace) {
         }
       };
 
+      var routesWithBadHandlers = [];
+
       // add routes
       _.each(self.routes, function (route, key) {
 
@@ -78,9 +80,13 @@ var Router = function(namespace) {
           );
         }
         else {
-          throw new Error('invalid handler for route: ' + route.name);
+          routesWithBadHandlers.push(route.name);
         }
       });
+
+      if(routesWithBadHandlers.length !== 0) {
+        throw new Error('the following routes have invalid handlers: ' + routesWithBadHandlers.join(' '));
+      }
 
       return newRouter;
     };

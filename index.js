@@ -77,7 +77,19 @@ var Router = function(namespace) {
             handlers.constructor.prototype._baseHandler.bind(app, handler, route)
           );
         }
-
+        else {
+          var replacementHandler = function(httpContext) {
+            httpContext.response.statusCode = 500;
+            httpContext.response.end('invalid route handler');
+          }
+          //there is a bad route, at least give a warning
+          newRouter.use(
+            route.method, 
+            route.path, 
+            { timeout: route.timeout }, 
+            handlers.constructor.prototype._baseHandler.bind(app, replacementHandler, route)
+          );
+        }
       });
 
       return newRouter;

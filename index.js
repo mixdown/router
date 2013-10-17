@@ -189,7 +189,6 @@ var Router = function(namespace) {
       var attempt = self.create();  
     }
     catch(err){
-      console.log(err)
       done(err);
       return;
     }

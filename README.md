@@ -1,7 +1,15 @@
 router
 ======
 
-Router plugin for mixdown
+Bi-directional router for node.js and browsers.  
+
+**Features**
+
+* Bi-directional routers can both interpret and generate urls. 
+* Configuration based routes implemented with a route table or manifest. 
+* Compatible with node.js on the server
+* Compatible with modern browsers and push state.
+* TODO: finish testing in older browsers where post-backs are necessary.  Consider hashbangs.  Hopefully, someone in the community can pitch in here.
 
 Install
 =======
@@ -13,7 +21,7 @@ npm install mixdown-router
 Usage
 =====
 
-HTTP server side router for mixdown.  This plugin consumes declarative route table configuration and generates routes.
+This plugin consumes declarative route table configuration and generates routes.
 
 Mixdown configuration file.  There are 2 parts to declare.  
 

@@ -11,6 +11,9 @@ Bi-directional router for node.js and browsers.
 * Compatible with modern browsers and push state.
 * TODO: finish testing in older browsers where post-backs are necessary.  Consider hashbangs.  Hopefully, someone in the community can pitch in here.
 
+![travis-ci status](https://travis-ci.org/mixdown/router.png)
+
+
 Install
 =======
 

@@ -40,7 +40,6 @@
       "iphone": [ 6 ],
       "ipad": [ 6 ]
       },
-      "harness" : "tape",
       "files": [
         "tests/tap/init.js",
         "tests/tap/routetable.js",

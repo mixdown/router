@@ -57,6 +57,8 @@ var Router = function(namespace) {
         }
       };
 
+      var routesWithBadHandlers = [];
+
       // add routes
       _.each(self.routes, function (route, key) {
 
@@ -77,8 +79,14 @@ var Router = function(namespace) {
             handlers.constructor.prototype._baseHandler.bind(app, handler, route)
           );
         }
-
+        else {
+          routesWithBadHandlers.push(route.name);
+        }
       });
+
+      if(routesWithBadHandlers.length !== 0) {
+        throw new Error('the following routes have invalid handlers: ' + routesWithBadHandlers.join(' '));
+      }
 
       return newRouter;
     };
@@ -173,6 +181,19 @@ var Router = function(namespace) {
 
       return req;
     };
+  };
+
+  this.init = function(done) {
+    var self = this[namespace];
+    try{
+      var attempt = self.create();  
+    }
+    catch(err){
+      done(err);
+      return;
+    }
+
+    done(null,self);
   };
 };
 

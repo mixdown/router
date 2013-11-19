@@ -1,5 +1,5 @@
 ![travis-ci status](https://travis-ci.org/mixdown/router.png)
-[![browser support](https://ci.testling.com/allspeeds/mixdown-router.png)](https://ci.testling.com/allspeeds/mixdown-router)
+[![browser support](https://ci.testling.com/allspeeds/router.png)](https://ci.testling.com/allspeeds/router)
 
 router
 ======

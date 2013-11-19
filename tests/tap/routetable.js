@@ -92,5 +92,4 @@ _.each(server.apps, function(app, appid) {
     router.dispatch(req, res);
 
   });
-
 });

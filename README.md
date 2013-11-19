@@ -1,3 +1,7 @@
+![travis-ci status](https://travis-ci.org/mixdown/router.png)
+
+[![browser support](https://ci.testling.com/allspeeds/router.png)](https://ci.testling.com/allspeeds/router)
+
 router
 ======
 
@@ -10,8 +14,6 @@ Bi-directional router for node.js and browsers.
 * Compatible with node.js on the server
 * Compatible with modern browsers and push state.
 * TODO: finish testing in older browsers where post-backs are necessary.  Consider hashbangs.  Hopefully, someone in the community can pitch in here.
-
-![travis-ci status](https://travis-ci.org/mixdown/router.png)
 
 
 Install

@@ -40,7 +40,7 @@
       "iphone": [ 6 ],
       "ipad": [ 6 ]
       },
-      "harness" : "mocha-tdd",
+      "harness" : "tape",
       "files": [
         "tests/tap/init.js",
         "tests/tap/routetable.js",

@@ -44,7 +44,7 @@
         "tests/tap/init.js",
         "tests/tap/routetable.js",
         "tests/tap/urls.js",
-        "tests/catrouter.js"
+        "tests/catrouter.js",
         "tests/dogrouter.js"
       ]
     }  

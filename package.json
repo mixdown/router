@@ -43,6 +43,7 @@
       "files": [
         "tests/tap/init.js",
         "tests/tap/routetable.js",
-        "tests/tap/urls.js"      ]
+        "tests/tap/urls.js"
+        ]
     }  
 }

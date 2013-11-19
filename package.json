@@ -41,6 +41,12 @@
       "ipad": [ 6 ]
       },
       "harness" : "mocha-tdd",
-      "files": "tests/*.js"
+      "files": [
+        "tests/tap/init.js",
+        "tests/tap/routetable.js",
+        "tests/tap/urls.js",
+        "tests/catrouter.js"
+        "tests/dogrouter.js"
+      ]
     }  
 }

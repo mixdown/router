@@ -64,7 +64,7 @@ var Router = function(namespace) {
 
         // if HTML history exists (we are in a browser) and the route is not set to be interpreted 
         // on the client, then we skip it.
-        if (!route.browser && history) {
+        if (!route.browser && global.history) {
           return;
         }
 

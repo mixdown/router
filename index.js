@@ -62,6 +62,12 @@ var Router = function(namespace) {
       // add routes
       _.each(self.routes, function (route, key) {
 
+        // if HTML history exists (we are in a browser) and the route is not set to be interpreted 
+        // on the client, then we skip it.
+        if (!route.browser && history) {
+          return;
+        }
+
         // add route-level params
         if (route.params) {
           _.each(route.params, addParam);

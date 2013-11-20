@@ -19,7 +19,7 @@
   ],
   "dependencies": {
     "lodash": "~2.2.0",
-    "pipeline-router": "tommydudebreaux/pipeline-router",
+    "pipeline-router": "~1.1.6",
     "hammock": "~0.1.1"
   },
   "devDependencies": {

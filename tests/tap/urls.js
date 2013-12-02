@@ -83,7 +83,7 @@ _.each(server.apps, function(app, appid) {
 
       t.equal(uri.pathname, gold.pathname, 'Pathname should match the expected url.');
       t.equal(uri.path, gold.path, 'Path should match the expected url.');
-      t.deepEqual(uri.query, gold.query, 'Query should match expected object.');
+      t.notOk(uri.query, 'Query should match expected object.');
       t.deepEqual(uri.search, gold.search, 'Search should match expected object.');
       t.deepEqual(uri.host, gold.host, 'Host should match expected object.');
       t.deepEqual(uri.hostname, gold.hostname, 'Hostname should match expected object.');

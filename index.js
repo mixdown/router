@@ -98,17 +98,22 @@ var Router = function(namespace) {
     };
 
     self.listen = function(callback) {
-
-      /*
-      The popstate event - A popstate event is dispatched to the window every time the active history entry changes. If the history entry being activated was created
-      by a call to pushState or affected by a call to replaceState, the popstate event's state property contains a copy of the history entry's state object.
-      https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history
-      https://developer.mozilla.org/en-US/docs/Web/API/window.onpopstate
-      */
+      /**
+       * The popstate event - A popstate event is dispatched to the window every time the active history entry changes. If the history entry being activated was created
+       * by a call to pushState or affected by a call to replaceState, the popstate event's state property contains a copy of the history entry's state object.
+       * https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history
+       * https://developer.mozilla.org/en-US/docs/Web/API/window.onpopstate
+       */
       window.onpopstate = function(e) {
-        // you can access state using history.state
-        self.navigate(url.format(window.location));
+        if (e.state) {
+          // you can access state using history.state
+          self.navigate(url.format(window.location));
+        }
       };
+
+      // WebKit-based browsers fire onpopstate on page load.
+      // We are replacing initial state to {} here, to be able to go back to the initial page after history.pushState is called
+      history.replaceState({}, null, window.location.href);
 
       self.navigate(url.format(window.location), callback);
     };

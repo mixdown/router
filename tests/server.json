@@ -48,6 +48,8 @@
             },
 
             "single": {
+              "protocol": "http",
+              "hostname": "www.foo.com",
               "name":"single",
               "method": "GET",
               "path": "/dog/:id",
@@ -117,6 +119,9 @@
               }
             },
             "single": {
+              "protocol": "http",
+              "hostname": "www.foo.com",
+              "browser": true,
               "method": "GET",
               "path": "/cat/:id",
               "handler": "cat",

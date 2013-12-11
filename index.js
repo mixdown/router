@@ -40,7 +40,11 @@ var Router = function(namespace) {
     self.create = function() {
       var newRouter = new plRouter();
 
-      if (options.timeout) {
+      // browser should never execute timeout.
+      if (typeof window !== 'undefined') {
+        newRouter.timeout = 0;
+      }
+      else if (options.timeout) {
         newRouter.timeout = options.timeout;
       }
       

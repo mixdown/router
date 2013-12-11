@@ -73,20 +73,23 @@ var Router = function(namespace) {
           _.each(route.params, addParam);
         }
 
-        // check object first.
-        var handler = self.getHandler(route.handler);
+        // resolve and verify handler function if specified
+        if (route.handler) {
+          // check object first.
+          var handler = self.getHandler(route.handler);
 
-        // if we found the handler on the router, then bind it.
-        if (typeof(handler) === 'function') {
-          newRouter.use(
-            route.method, 
-            route.path, 
-            { timeout: route.timeout }, 
-            handlers.constructor.prototype._baseHandler.bind(app, handler, route)
-          );
-        }
-        else {
-          routesWithBadHandlers.push(route.name);
+          // if we found the handler on the router, then bind it.
+          if (typeof(handler) === 'function') {
+            newRouter.use(
+              route.method, 
+              route.path, 
+              { timeout: route.timeout }, 
+              handlers.constructor.prototype._baseHandler.bind(app, handler, route)
+            );
+          }
+          else {
+            routesWithBadHandlers.push(route.name);
+          }
         }
       });
 

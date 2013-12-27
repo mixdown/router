@@ -85,8 +85,8 @@ var Router = function(namespace) {
           newRouter.use(
             route.method, 
             route.path, 
-            { timeout: route.timeout }, 
-            handlers.constructor.prototype._baseHandler.bind(app, handler, route)
+            { timeout: route.timeout },
+            _.bind(handlers.constructor.prototype._baseHandler, app, handler, route)
           );
         }
         else {
@@ -152,22 +152,17 @@ var Router = function(namespace) {
          }
       }
 
+      // keep a single instance around in a browser.
+      if (!_clientRouter) {
+        _clientRouter = self.create();
+      }
+
       // if the route is in the route table, then generate the url.  if not, then this is a literal url.
       if (self.routes[route]) {
         newUrl = app.plugins.router.format(route, params);
       }
       else {
         newUrl = route;
-      }
-
-      if (!history.pushState) {
-        // window.location.href = newUrl;
-        return window.location.assign(newUrl);
-      }
-
-      // keep a single instance around in a browser.
-      if (!_clientRouter) {
-        _clientRouter = self.create();
       }
 
       var req = new MockRequest({ url: newUrl });

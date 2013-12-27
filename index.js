@@ -102,25 +102,39 @@ var Router = function(namespace) {
     };
 
     self.listen = function(callback) {
-      var _hasPushState = !!(window.history && window.history.pushState);
+      self._hasPushState = !!(window.history && window.history.pushState);
 
-      /**
-       * The popstate event - A popstate event is dispatched to the window every time the active history entry changes. If the history entry being activated was created
-       * by a call to pushState or affected by a call to replaceState, the popstate event's state property contains a copy of the history entry's state object.
-       * https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history
-       * https://developer.mozilla.org/en-US/docs/Web/API/window.onpopstate
-       */
-      window.onpopstate = function(e) {
-        if (e.state) {
+      if(self._hasPushState) {
+        /**
+         * The popstate event - A popstate event is dispatched to the window every time the active history entry changes. If the history entry being activated was created
+         * by a call to pushState or affected by a call to replaceState, the popstate event's state property contains a copy of the history entry's state object.
+         * https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history
+         * https://developer.mozilla.org/en-US/docs/Web/API/window.onpopstate
+         */
+        window.onpopstate = function(e) {
+          if (e.state) {
+            // you can access state using history.state
+            self.navigate(url.format(window.location));
+          }
+        };
+
+        // WebKit-based browsers fire onpopstate on page load.
+        // We are replacing initial state to {} here, to be able to go back to the initial page after history.pushState is called
+        // TODO: history.replaceState({}, null, window.location.href);
+
+      } else {
+        window.onhashchange = function() {
           // you can access state using history.state
           self.navigate(url.format(window.location));
-        }
-      };
+        };
 
-      // WebKit-based browsers fire onpopstate on page load.
-      // We are replacing initial state to {} here, to be able to go back to the initial page after history.pushState is called
-      if(_hasPushState) {
-        history.replaceState({}, null, window.location.href);
+        // TODO: If we've started off with a route from a `pushState`-enabled
+        // browser, but we're currently in a browser that doesn't support it...
+        // window.location.href = newUrl;
+        // window.location.assign(newUrl);
+        // Some browsers require that `hash` contains a leading #.
+        // location.hash = '#' + newUrl;
+
       }
 
       self.navigate(url.format(window.location), callback);
@@ -173,7 +187,13 @@ var Router = function(namespace) {
       _clientRouter.once('match', function(routerData) {
         var httpContext = routerData.httpContext;
         if (httpContext.url.href !== window.location.href) {
-          history.pushState({}, httpContext.url.pathname, httpContext.url.href);
+
+          if(self._hasPushState) {
+            history.pushState({}, httpContext.url.pathname, httpContext.url.href);
+          } else {
+            // console.log('update hash');
+          }
+
         }
       });
 

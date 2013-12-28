@@ -19,6 +19,15 @@ var Router = function(namespace) {
     var app = options.app;
     var handlers = options.handlers || instance;
 
+    // Cached regex for stripping a leading hash/slash and trailing space.
+    var routeStripper = /^[#\/]|\s+$/g;
+
+    // Cached regex for stripping leading and trailing slashes.
+    var rootStripper = /^\/+|\/+$/g;
+
+    // Cached regex for removing a trailing slash.
+    var trailingSlash = /\/$/;    
+
     // attach the generator part of the router.
     Generator.constructor.call(instance, namespace);
     Generator.prototype.attach.call(this, options);
@@ -101,40 +110,77 @@ var Router = function(namespace) {
       return newRouter;
     };
 
+    // Gets the true hash value. Cannot use location.hash directly due to bug in Firefox where
+    // location.hash will always be decoded.
+    self.getHash = function() {
+      var match = window.location.href.match(/#(.*)$/);
+      return match ? match[1] : '';
+    };
+
+    // Get the cross-browser normalized URL fragment, either from the URL,
+    // the hash, or the override.
+    self.getFragment = function(fragment, forcePushState) {
+      if(fragment == null) {
+        if(self._hasPushState || forcePushState) {
+          fragment = window.location.pathname;
+          var root = self.root.replace(trailingSlash, '');
+          if(!fragment.indexOf(root)) fragment = fragment.slice(root.length);
+        } else {
+          fragment = self.getHash();
+        }
+      }
+
+      return fragment.replace(rootStripper, '');
+    };
+
     self.listen = function(callback) {
       self._hasPushState = !!(window.history && window.history.pushState);
+      self.root = '/'; // root can be extended with an option later if necessary
+
+      var loc = window.location;
+      var fragment = self.getFragment();
+
+      // Normalize root to always include a leading and trailing slash.
+      self.root = ('/' + self.root + '/').replace(rootStripper, '/');
+      var atRoot = loc.pathname.replace(/[^\/]$/, '$&/') === self.root;
 
       if(self._hasPushState) {
-        /**
-         * The popstate event - A popstate event is dispatched to the window every time the active history entry changes. If the history entry being activated was created
-         * by a call to pushState or affected by a call to replaceState, the popstate event's state property contains a copy of the history entry's state object.
-         * https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history
-         * https://developer.mozilla.org/en-US/docs/Web/API/window.onpopstate
-         */
+
+        // The popstate event - A popstate event is dispatched to the window every time the active history
+        // entry changes. If the history entry being activated was created by a call to pushState or affected
+        // by a call to replaceState, the popstate event's state property contains a copy of the history
+        // entry's state object.
+        // https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history
+        // https://developer.mozilla.org/en-US/docs/Web/API/window.onpopstate
+
         window.onpopstate = function(e) {
-          if (e.state) {
-            // you can access state using history.state
-            self.navigate(url.format(window.location));
+          if (e.state) { // WebKit-based browsers fire onpopstate on page load.
+            self.navigate(url.format(loc));
           }
         };
 
-        // WebKit-based browsers fire onpopstate on page load.
-        // We are replacing initial state to {} here, to be able to go back to the initial page after history.pushState is called
-        // TODO: history.replaceState({}, null, window.location.href);
-
       } else {
+
         window.onhashchange = function() {
           // you can access state using history.state
-          self.navigate(url.format(window.location));
+          self.navigate(url.format(loc));
         };
 
-        // TODO: If we've started off with a route from a `pushState`-enabled
-        // browser, but we're currently in a browser that doesn't support it...
-        // window.location.href = newUrl;
-        // window.location.assign(newUrl);
-        // Some browsers require that `hash` contains a leading #.
-        // location.hash = '#' + newUrl;
+      }
 
+      // If we've started off with a route from a `pushState`-enabled browser, but we're currently in a
+      // browser that doesn't support it...
+      if (!self._hasPushState && !atRoot) {
+          fragment = self.getFragment(null, true);
+          window.location.replace(self.root + window.location.search + '#' + fragment);
+          // Return immediately as browser will do redirect to new url
+          return true;        
+
+      // Or if we've started out with a hash-based route, but we're currently in a browser where it could be
+      // `pushState`-based instead...
+      } else if (self._hasPushState && atRoot && loc.hash) {
+        fragment = self.getHash().replace(routeStripper, '');
+        window.history.replaceState({}, document.title, self.root + fragment + loc.search);
       }
 
       self.navigate(url.format(window.location), callback);

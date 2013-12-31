@@ -243,7 +243,7 @@ var Router = function(namespace) {
           if(self._hasPushState) {
             window.history.pushState({}, document.title, httpContext.url.href);
           } else {
-            window.location.replace('#' + httpContext.url.path.replace(routeStripper, ''));
+            window.location.hash = '#' + httpContext.url.path.replace(routeStripper, '');
           }
         }
       });

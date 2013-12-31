@@ -171,10 +171,10 @@ var Router = function(namespace) {
       // If we've started off with a route from a `pushState`-enabled browser, but we're currently in a
       // browser that doesn't support it...
       if (!self._hasPushState && !atRoot) {
-          fragment = self.getFragment(null, true);
-          window.location.replace(self.root + window.location.search + '#' + fragment);
-          // Return immediately as browser will do redirect to new url
-          return true;        
+        fragment = self.getFragment(null, true);
+        window.location.replace(self.root + window.location.search + '#' + fragment);
+        // Return immediately as browser will do redirect to new url
+        return true;        
 
       // Or if we've started out with a hash-based route, but we're currently in a browser where it could be
       // `pushState`-based instead...
@@ -196,8 +196,6 @@ var Router = function(namespace) {
     // 2. function(url, callback)
     // @param url {Object|String}: Can be url string or node url object. 
     self.navigate = function(route, params, callback) {
-      var newUrl = null;
-
       // handle 2 arg variant function signatures.
       if (arguments.length === 2) {
          var arg1 = arguments[1];
@@ -217,12 +215,20 @@ var Router = function(namespace) {
         _clientRouter = self.create();
       }
 
-      // if the route is in the route table, then generate the url.  if not, then this is a literal url.
+      var newUrl = null;
+
+      // If the route is in the route table, then generate the url.  If not, check for hash or finally a literal url.
       if (self.routes[route]) {
         newUrl = app.plugins.router.format(route, params);
       }
       else {
-        newUrl = route;
+        var urlObj = url.parse(route);
+
+        if(urlObj.hash) {
+          newUrl = route.replace(/#/, '');
+        } else {
+          newUrl = route;
+        }
       }
 
       var req = new MockRequest({ url: newUrl });
@@ -232,14 +238,13 @@ var Router = function(namespace) {
       // This is good for devs for the situation where there is a problem with the controller handler which will cause the pipeline to stop.
       _clientRouter.once('match', function(routerData) {
         var httpContext = routerData.httpContext;
+
         if (httpContext.url.href !== window.location.href) {
-
           if(self._hasPushState) {
-            history.pushState({}, httpContext.url.pathname, httpContext.url.href);
+            window.history.pushState({}, document.title, httpContext.url.href);
           } else {
-            // console.log('update hash');
+            window.location.replace('#' + httpContext.url.path.replace(routeStripper, ''));
           }
-
         }
       });
 

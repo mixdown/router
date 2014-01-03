@@ -119,33 +119,57 @@ var app = {
   plugins: new (require('broadway')).App()
 };
 
-app.plugins.use(new Router(){ 
-  , app: app 
-  , params: {
-      "gender": "(\\w+)",
-      "age": "(\\d+)",
-      "id": "(\\d{1})",
-      "bark": "bark-(loud|quiet)"
-    }
-  , routes: {
-      "search": {
-        "method": "GET",
-        "path": "/dogs/:gender/:bark/:age",
-        "handler": "dogs"
-      },
-      "single": {
-        "method": "GET",
-        "path": "/dog/:id",
-        "query": [ "hidePictures" ],
-        "handler": "dog"
-      },
-      "create": {
-        "method": "POST",
-        "path": "/create/dog/:id",
-        "body": [ "gender", "age", "phone" ],
-        "handler": "create"
+app.plugins.use(new Router() { 
+  app: app, 
+  routes: {
+    "search": {
+      "method": "GET",
+      "path": "/dogs/:gender/:bark/:age",
+      "handler": "dogs",
+      "params": {
+        "bark": {
+          "regex": "bark-(loud|quiet)",
+          "kind": "rest",
+          "enabled": true
+        },
+        "gender": {
+          "regex": "(\\w+)",
+          "kind": "rest",
+          "enabled": true
+        },
+        "age": {
+          "regex": "(\\d+)",
+          "kind": "rest",
+          "enabled": true
+        }
       }
+    },
+
+    "single": {
+      "method": "GET",
+      "path": "/dog/:id",
+      "handler": "dog",
+      "params": {
+        "hidePictures": {
+          "kind": "query",
+          "regex": "(true|false)",
+          "enabled": true
+        },
+        "id": {
+          "regex": "(\\d{1})",
+          "kind": "rest",
+          "enabled": true
+        }
+      }
+    },
+
+    "home": {
+      "method": "GET",
+      "path": "/",
+      "handler": "index",
+      "params": {}
     }
+  }
 });
 
 // Get the url as a node url object

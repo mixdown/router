@@ -1,0 +1,49 @@
+{
+  "search": {
+    "method": "GET",
+    "path": "/dogs/:gender/:bark/:age",
+    "handler": "dogs",
+    "params": {
+      "bark": {
+        "regex": "bark-(loud|quiet)",
+        "kind": "rest",
+        "enabled": true
+      },
+      "gender": {
+        "regex": "(\\w+)",
+        "kind": "rest",
+        "enabled": true
+      },
+      "age": {
+        "regex": "(\\d+)",
+        "kind": "rest",
+        "enabled": true
+      }
+    }
+  },
+
+  "single": {
+    "method": "GET",
+    "path": "/dog/:id",
+    "handler": "dog",
+    "params": {
+      "hidePictures": {
+        "kind": "query",
+        "regex": "(true|false)",
+        "enabled": true
+      },
+      "id": {
+        "regex": "(\\d{1})",
+        "kind": "rest",
+        "enabled": true
+      }
+    }
+  },
+
+  "home": {
+    "method": "GET",
+    "path": "/",
+    "handler": "index",
+    "params": {}
+  }
+}

@@ -1,11 +1,10 @@
 ![travis-ci status](https://travis-ci.org/mixdown/router.png)
 
-[![browser support](https://ci.testling.com/allspeeds/router.png)](https://ci.testling.com/allspeeds/router)
+[![browser support](https://ci.testling.com/mixdown/router.png)](https://ci.testling.com/mixdown/router)
 
-router
-======
+## mixdown-router
 
-Bi-directional router for node.js and browsers.  
+Bi-directional router for node.js and browsers.  This module provides consistent pattern for declaring routes in a web application as well as interpreting http(s) requests and passing controller to a controller action.
 
 **Features**
 
@@ -13,156 +12,57 @@ Bi-directional router for node.js and browsers.
 * Configuration based routes implemented with a route table or manifest. 
 * Compatible with node.js on the server
 * Compatible with modern browsers and push state.
-* TODO: finish testing in older browsers where post-backs are necessary.  Consider hashbangs.  Hopefully, someone in the community can pitch in here.
+* IN PROCESS: Implement options for older browsers like IE8.
 
 
-Install
-=======
+## Install
 
 ```
 npm install mixdown-router
 ```
 
-Usage
-=====
+## Usage
 
-This plugin consumes declarative route table configuration and generates routes.
+This plugin consumes declarative route table configuration.  The route table is used to generate urls as well as interpret HTTP requests.
 
-Mixdown configuration file.  There are 2 parts to declare.  
-
-* Params is a hash of named parameters with regex matching.  There can only be one match group in the regex.  The matched value (the part in the parentheses) is the only part that will be passed to the handler.  See the bark param below.  
-
-* Routes hash contains format strings for the routes.  These are the same as [pipeline-router](https://github.com/tommydudebreaux/pipeline-router "pipeline-router").
-
-
-```javascript
-
-"router": {
-  "module": "/tests/dogrouter.js",
-  "options": {
-    "routes": {
-      "search": {
-        "method": "GET",
-        "path": "/dogs/:gender/:bark/:age",
-        "handler": "dogs",
-        "params": {
-          "bark": {
-            "regex": "bark-(loud|quiet)",
-            "kind": "rest"
-          },
-          "gender": {
-            "regex": "(\\w+)",
-            "kind": "rest"
-          },
-          "age": {
-            "regex": "(\\d+)",
-            "kind": "rest"
-          }
-        }
-      },
-
-      "single": {
-        "method": "GET",
-        "path": "/dog/:id",
-        "handler": "dog",
-        "params": {
-          "hidePictures": {
-            "kind": "query",
-            "regex": "(true|false)"
-          },
-          "id": {
-            "regex": "(\\d{1})",
-            "kind": "rest"
-          }
-        }
-      },
-
-      "create": {
-        "method": "POST",
-        "path": "/create/dog/:id",
-        "body": [ "gender", "age", "phone" ],
-        "handler": "create",
-        "params": {
-          "id": {
-            "kind": "rest",
-            "regex": "(\\d{1})"
-          }
-        }
-      }
-    }
-  }
-}
+```javasript
 
 ```
 
-Next, you need to declare a router with handlers.  This is accomplished by inheriting from the base router.  Example of the dogrouter which is declared above.
+## Plugin Configuration
 
-```javascript
+* **routes**: [required] This block contains the route table manifest.  See Manifest Specification below.
 
-var _ = require('lodash');
-var util = require('util');
-var Router = require('mixdown-router');
+* **timeout**: [optional] Global router setting.  Number of milliseconds to wait before sending a 500 and timeout to the client.  This will avoid hanging sockets if your controller never writes the response (usually this is in error).  Default is set in the [pipeline-router dependency here](https://github.com/tommydudebreaux/pipeline-router/blob/master/index.js#L33).  Currently ```120000``` or 2 minutes, same as node.js socket timeout.
 
-// create a trivial list of dogs.
-var dogList = [
-  { id: 1, breed: 'boxer', gender: 'male', bark: 'loud', age: 2 },
-  { id: 2, breed: 'boston terrier', gender: 'female', bark: 'quiet', age: 4 },
-  { id: 3, breed: 'chihuahua', gender: 'male', bark: 'loud', age: 6 },
-  { id: 4, breed: 'poodle', gender: 'female', bark: 'quiet', age: 5 }
-];
+Routes hash contains format strings for the routes.  These are the same as [pipeline-router](https://github.com/tommydudebreaux/pipeline-router "pipeline-router").
 
-// This function searches the list.  
-var searchDogs = function(age, gender, bark) {
-  return _.filter(dogList, function(d) {
-    return (d.age == age || !age) &&
-           (d.gender == gender || !gender) && 
-           (d.bark == bark || !bark);
-  });
-};
+## Manifest Specification
 
-// Create a new prototype and make it inherit from Router
-var DogRouter = function() {
-  Router.apply(this, arguments);
+The routes hash is a list of named routes that look a lot like the [node.js url object](http://nodejs.org/api/url.html), but with more properties for specifying parameters.
 
-  // This examples attaches route handlers to the object instance.
-  this.index = function() {
-    var app = this.app;
-    var req = this.req;
-    var res = this.res;
+* **method**: [optional] The http verb to interpret.  same as the node.js url object.  default ```GET```
+* **protocol**: [optional] Same as the node.js url object.  ex: http, https.  This is handy for specifying urls to resources from a different domain than your node server.  (ex: CDN resource)
+* **name**: [required] the name of the route.  MUST MATCH THE KEY.  (backlog: remove this and have mixdown-router handle implicitly)
+* **path**: [required] the RESTful part of the url.  To specify a parameter, then use ```:name_of_param```
+* **description**: [optional] Plain text hint for people to read about the route.
+* **enabled**: [optional] if true, then the route will be evaluated by the router.  If false, then this route can only be used for url generation. Default: ```false```
+* **timeout**: Number of milliseconds to wait before sending a 500 and timeout to the client.  This overrides the global setting which is described above.
+* **browser**: If true, then this is a browser only route.  It will not be interpreted by the server.
 
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Welcome to ' + app.id + ' search');
-  };
+* **handler**: [required] The name of the controller function which will process this route. (backlog: if null, then try the route name method).  
 
-  // This examples attaches route handlers to the object instance.
-  // In this case, the restful params are passed in a hash to the handler
-  this.dogs = function(restParams) {
-    var req = this.req;
-    var res = this.res;
-    var results = searchDogs(restParams.age, restParams.gender, restParams.bark);
 
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(results));
-  };
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NOTE: if there is no handler function defined on the router instance, then the plugin's initialization will fail hard (and mixdown will not start).  This is on purpose to encourage folks to be pedantic and define only what is necessary.
 
-};
-util.inherits(DogRouter, Router);
+* **params**: Hash of parameters that are validated and interpreted by the router.
+* **params[param_name].kind**: [required] Tells the router where to find the parameter on the url. Valid values are ```rest``` and ```query```.  (backlog: consider supporting cookie or header parsing/validation)
+* **params[param_name].description**: [optional] Plain language describing the param to humans. 
+* **params[param_name].regex**: [required] Regular Expression used to validate the input. (backlog: make optional and accept anything except url separator) 
+* **params[param_name].default**: [optional] If the parameter is not defined, then this value is used.  This is only active for ```query``` parameters as using for REST params would cause the full url validation.
+* **params[param_name].enabled**: This means that users of the route area allowed to send a value.  If false, then the param is set as a constant value.  Useful if you have a querystring that needs to be dependency injected to a controller, but your users are not allows to touch it. (ex: configuring an apikey)
 
-// You can also extend the prototype to attach the handler like this
-DogRouter.prototype.dog = function(restParams) {
-  var req = this.req;
-  var res = this.res;
-  var results = _.find(dogList, function(d) { return d.id == restParams.id; });
 
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify(results));
-};
-
-module.exports = DogRouter;
-
-```
-
-If you have a mixdown server running, then this should be all you need to get started.  See the units for more examples.
 
 Url Generation
 ==============

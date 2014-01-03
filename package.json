@@ -4,7 +4,7 @@
   "description": "Router for mixdown.js",
   "main": "index.js",
   "scripts": {
-    "test": "tape tests/tap/*"
+    "test": "mocha -R spec -u tdd test/tests/*.js"
   },
   "repository": {
     "type": "git",
@@ -23,8 +23,8 @@
     "hammock": "~0.1.1"
   },
   "devDependencies": {
-    "tape": "*",
-    "mixdown-server": "0.3.x"
+    "mocha": "*",
+    "broadway": "~0.2.9"
   },
   "author": "Tommy at Vast dot com",
   "license": "MIT",

@@ -224,7 +224,7 @@ var Router = function(namespace) {
       }
 
       var newUrl = null;
-      var loc = url.parse(window.location.href);
+      var loc = self.location || url.parse(window.location.href);
 
 
       // If the route is in the route table, then generate the url.  If not, check for hash or finally a literal url.
@@ -275,12 +275,16 @@ var Router = function(namespace) {
         var httpContext = routerData.httpContext;
 
         if (httpContext.url.href !== window.location.href) {
+
           if(self._hasPushState) {
             window.history.pushState({}, document.title, httpContext.url.href);
           } else {
             window.location.hash = '#' + httpContext.url.path.replace(routeStripper, '');
           }
+
         }
+        self.location = url.parse(window.location.href);
+
       });
 
       // fire callback once the handler has executed.  Note: javascript is async.  The handler might not be done when this callback is fired... but you already knew that!

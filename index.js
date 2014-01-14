@@ -166,7 +166,6 @@ var Router = function(namespace) {
           self.navigate(url.format(loc));
         };
       }
-      debugger;
 
       var replaceStateUrl = url.parse(window.location.href);
 
@@ -227,7 +226,6 @@ var Router = function(namespace) {
       var newUrl = null;
       var loc = url.parse(window.location.href);
 
-      debugger;
 
       // If the route is in the route table, then generate the url.  If not, check for hash or finally a literal url.
       if (self.routes[route]) {

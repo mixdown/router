@@ -27,6 +27,62 @@ This plugin consumes declarative route table configuration.  The route table is 
 
 [Unit tests startup a simple node server](https://github.com/mixdown/router/blob/master/test/fixture/server.js).  This could be injected to any framework like mixdown or express.
 
+**routes.json**
+
+```javascript
+{
+  "search": {
+    "method": "GET",
+    "path": "/dogs/:gender/:bark/:age",
+    "handler": "dogs",
+    "params": {
+      "bark": {
+        "regex": "bark-(loud|quiet)",
+        "kind": "rest",
+        "enabled": true
+      },
+      "gender": {
+        "regex": "(\\w+)",
+        "kind": "rest",
+        "enabled": true
+      },
+      "age": {
+        "regex": "(\\d+)",
+        "kind": "rest",
+        "enabled": true
+      }
+    }
+  },
+
+  "single": {
+    "method": "GET",
+    "path": "/dog/:id",
+    "handler": "dog",
+    "params": {
+      "hidePictures": {
+        "kind": "query",
+        "regex": "(true|false)",
+        "enabled": true
+      },
+      "id": {
+        "regex": "(\\d{1})",
+        "kind": "rest",
+        "enabled": true
+      }
+    }
+  },
+
+  "home": {
+    "method": "GET",
+    "path": "/",
+    "handler": "index",
+    "params": {}
+  }
+}
+```
+
+**server.js** 
+
 ```javasript
 var broadway = require('broadway');
 var Router = require('./router.js');
@@ -114,7 +170,7 @@ Since the route table should be the single source for all things routing, then i
 To generate a route, here is an example which is disconnected from mixdown config.
 
 ```javascript
-var Router = require('../tests/catrouter.js');
+var Router = require('mixdown-router');
 var app = {
   plugins: new (require('broadway')).App()
 };

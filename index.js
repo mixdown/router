@@ -14,7 +14,7 @@ var Router = function(namespace) {
   /**
   * Attaches a router plugin to an application.
   *
-  **/ 
+  **/
   this.attach = function (options) {
     var app = options.app;
     var handlers = options.handlers || instance;
@@ -26,7 +26,7 @@ var Router = function(namespace) {
     var rootStripper = /^\/+|\/+$/g;
 
     // Cached regex for removing a trailing slash.
-    var trailingSlash = /\/$/;    
+    var trailingSlash = /\/$/;
 
     // attach the generator part of the router.
     Generator.constructor.call(instance, namespace);
@@ -34,7 +34,7 @@ var Router = function(namespace) {
 
     var self = this[namespace];
     var _clientRouter = null;
-    
+
     // attach the server side component
     self.getHandler = function(key) {
       // check object first.
@@ -56,7 +56,7 @@ var Router = function(namespace) {
       else if (options.timeout) {
         newRouter.timeout = options.timeout;
       }
-      
+
       var addParam = function (param, key) {
 
         if (param && param.regex) {
@@ -75,7 +75,7 @@ var Router = function(namespace) {
       // add routes
       _.each(self.routes, function (route, key) {
 
-        // if HTML history exists (we are in a browser) and the route is not set to be interpreted 
+        // if HTML history exists (we are in a browser) and the route is not set to be interpreted
         // on the client, then we skip it.
         if (!route.browser && global.history) {
           return;
@@ -92,8 +92,8 @@ var Router = function(namespace) {
         // if we found the handler on the router, then bind it.
         if (typeof(handler) === 'function') {
           newRouter.use(
-            route.method, 
-            route.path, 
+            route.method,
+            route.path,
             { timeout: route.timeout },
             _.bind(handlers.constructor.prototype._baseHandler, app, handler, route)
           );
@@ -138,7 +138,6 @@ var Router = function(namespace) {
       self.root = '/'; // root can be extended with an option later if necessary
 
       var loc = window.location;
-      var fragment = self.getFragment();
 
       // Normalize root to always include a leading and trailing slash.
       self.root = ('/' + self.root + '/').replace(rootStripper, '/');
@@ -159,28 +158,37 @@ var Router = function(namespace) {
           }
         };
 
-      } else {
+      } 
+      else {
 
         window.onhashchange = function() {
           // you can access state using history.state
           self.navigate(url.format(loc));
         };
-
       }
+      debugger;
+
+      var replaceStateUrl = url.parse(window.location.href);
 
       // If we've started off with a route from a `pushState`-enabled browser, but we're currently in a
       // browser that doesn't support it...
       if (!self._hasPushState && !atRoot) {
-        fragment = self.getFragment(null, true);
-        window.location.replace(self.root + window.location.search + '#' + fragment);
+
+        replaceStateUrl.pathname = self.root;
+        replaceStateUrl.hash = self.getFragment(null, true);
+
+        window.location.replace(url.format(replaceStateUrl));
         // Return immediately as browser will do redirect to new url
-        return true;        
+        return true;
 
       // Or if we've started out with a hash-based route, but we're currently in a browser where it could be
       // `pushState`-based instead...
       } else if (self._hasPushState && atRoot && loc.hash) {
-        fragment = self.getHash().replace(routeStripper, '');
-        window.history.replaceState({}, document.title, self.root + fragment + loc.search);
+
+        replaceStateUrl.pathname = self.root;
+        replaceStateUrl.hash = self.getHash().replace(routeStripper, '');
+
+        window.history.replaceState({}, document.title, url.format(replaceStateUrl));
       }
 
       self.navigate(url.format(window.location), callback);
@@ -194,8 +202,9 @@ var Router = function(namespace) {
     // @param params {Object}: hash of params to send to url generation.
     //
     // 2. function(url, callback)
-    // @param url {Object|String}: Can be url string or node url object. 
+    // @param url {Object|String}: Can be url string or node url object.
     self.navigate = function(route, params, callback) {
+
       // handle 2 arg variant function signatures.
       if (arguments.length === 2) {
          var arg1 = arguments[1];
@@ -216,25 +225,53 @@ var Router = function(namespace) {
       }
 
       var newUrl = null;
+      var loc = url.parse(window.location.href);
+
+      debugger;
 
       // If the route is in the route table, then generate the url.  If not, check for hash or finally a literal url.
       if (self.routes[route]) {
-        newUrl = app.plugins.router.format(route, params);
-      }
-      else {
-        var urlObj = url.parse(route);
+        newUrl = app.plugins.router.url(route, params);
 
-        if(urlObj.hash) {
-          newUrl = route.replace(/#/, '');
-        } else {
-          newUrl = route;
+        // Test if this href is going to be the same as the current.  
+        // If same, then return b/c there is no reason to re-route.
+
+        // TODO:  loc.hash has the query and the hash on it.
+        if (self.initialized && !self._hasPushState && newUrl.pathname == loc.hash && newUrl.search === loc.search) {
+          return null;
+        }
+
+        if (self.initialized && self._hasPushState && newUrl.pathname === loc.pathname && newUrl.search === loc.search) {
+          return null;
         }
       }
+      else {
+        var newUrl = url.parse(route);
 
-      var req = new MockRequest({ url: newUrl });
+        // Test if this href is going to be the same as the current.  
+        // If same, then return b/c there is no reason to re-route.
+        if (self.initialized &&
+            newUrl.pathname === loc.pathname &&
+            newUrl.search == loc.search &&
+            newUrl.hash == loc.hash
+        ) {
+          return null;
+        }
+
+        if(newUrl.hash) {
+
+          // move the hash route to the url temporarily.
+          newUrl.pathname = self.root + newUrl.hash.slice(1);
+          newUrl.hash = null;
+
+        } 
+      }
+
+
+      var req = new MockRequest({ url: url.format(newUrl) });
       var res = new MockResponse();
 
-      // if the route was matched, then change the url.  This will change the url in the address bar before the handler runs.  
+      // if the route was matched, then change the url.  This will change the url in the address bar before the handler runs.
       // This is good for devs for the situation where there is a problem with the controller handler which will cause the pipeline to stop.
       _clientRouter.once('match', function(routerData) {
         var httpContext = routerData.httpContext;
@@ -251,6 +288,13 @@ var Router = function(namespace) {
       // fire callback once the handler has executed.  Note: javascript is async.  The handler might not be done when this callback is fired... but you already knew that!
       _clientRouter.once('end', function(err, results) {
 
+        // these are here b/c EventEmitter.once() does not remove the event properly after it executes in
+        // older browsers (specifically IE8)
+        if (!self._hasPushState) {
+          _clientRouter.removeAllListeners('match');
+          _clientRouter.removeAllListeners('end');
+        }
+
         typeof(callback) === 'function' ? callback(err, {
           matched: results[0].matched,
           res: res,
@@ -264,6 +308,7 @@ var Router = function(namespace) {
       // setTimeout(_clientRouter.dispatch.bind(_clientRouter, req, res), 5);
       _clientRouter.dispatch(req, res);
 
+      self.initialized = true;
       return req;
     };
   };
@@ -271,7 +316,7 @@ var Router = function(namespace) {
   this.init = function(done) {
     var self = this[namespace];
     try{
-      var attempt = self.create();  
+      var attempt = self.create();
     }
     catch(err){
       done(err);

@@ -1,10 +1,10 @@
 {
   "name": "mixdown-router",
-  "version": "1.2.1",
+  "version": "2.0.0",
   "description": "Router for mixdown.js",
   "main": "index.js",
   "scripts": {
-    "test": "tape tests/tap/*"
+    "test": "mocha -R spec -u tdd test/tests/*.js"
   },
   "repository": {
     "type": "git",
@@ -19,12 +19,12 @@
   ],
   "dependencies": {
     "lodash": "~2.2.0",
-    "pipeline-router": "~1.1.6",
-    "hammock": "~0.1.1"
+    "pipeline-router": "~1.1.7",
+    "hammock": "~0.1.4"
   },
   "devDependencies": {
-    "tape": "*",
-    "mixdown-server": "0.3.x"
+    "mocha": "*",
+    "broadway": "~0.2.9"
   },
   "author": "Tommy at Vast dot com",
   "license": "MIT",

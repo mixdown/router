@@ -155,7 +155,7 @@ var Router = function(namespace) {
 
         window.onpopstate = function(e) {
           if (e.state) { // WebKit-based browsers fire onpopstate on page load.
-            self.navigate(url.format(loc));
+            self.navigate(href);
           }
         };
 
@@ -164,7 +164,7 @@ var Router = function(namespace) {
         href = href.replace('#', '');
 
         window.onhashchange = function() {
-          self.navigate(url.format(loc).replace('#', ''));
+          self.navigate(href);
         };
       }
 

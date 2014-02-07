@@ -74,32 +74,34 @@ var Router = function(namespace) {
 
       // add routes
       _.each(self.routes, function (route, key) {
+        // if a handler is specified, validate and bind it
+        if (route.handler) {
+          // if HTML history exists (we are in a browser) and the route is not set to be interpreted
+          // on the client, then we skip it.
+          if (!route.browser && global.history) {
+            return;
+          }
 
-        // if HTML history exists (we are in a browser) and the route is not set to be interpreted
-        // on the client, then we skip it.
-        if (!route.browser && global.history) {
-          return;
-        }
+          // add route-level params
+          if (route.params) {
+            _.each(route.params, addParam);
+          }
 
-        // add route-level params
-        if (route.params) {
-          _.each(route.params, addParam);
-        }
+          // check object first.
+          var handler = self.getHandler(route.handler);
 
-        // check object first.
-        var handler = self.getHandler(route.handler);
-
-        // if we found the handler on the router, then bind it.
-        if (typeof(handler) === 'function') {
-          newRouter.use(
-            route.method,
-            route.path,
-            { timeout: route.timeout },
-            _.bind(handlers.constructor.prototype._baseHandler, app, handler, route)
-          );
-        }
-        else {
-          routesWithBadHandlers.push(route.name);
+          // if we found the handler on the router, then bind it.
+          if (typeof(handler) === 'function') {
+            newRouter.use(
+              route.method,
+              route.path,
+              { timeout: route.timeout },
+              _.bind(handlers.constructor.prototype._baseHandler, app, handler, route)
+            );
+          }
+          else {
+            routesWithBadHandlers.push(route.name);
+          }
         }
       });
 

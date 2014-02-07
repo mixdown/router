@@ -138,12 +138,13 @@ var Router = function(namespace) {
       self.root = '/'; // root can be extended with an option later if necessary
 
       var loc = window.location;
+      var href = url.format(loc);
 
       // Normalize root to always include a leading and trailing slash.
       self.root = ('/' + self.root + '/').replace(rootStripper, '/');
       var atRoot = loc.pathname.replace(/[^\/]$/, '$&/') === self.root;
 
-      if(self._hasPushState) {
+      if (self._hasPushState) {
 
         // The popstate event - A popstate event is dispatched to the window every time the active history
         // entry changes. If the history entry being activated was created by a call to pushState or affected
@@ -158,12 +159,12 @@ var Router = function(namespace) {
           }
         };
 
-      } 
-      else {
+      } else {
+
+        href = href.replace('#', '');
 
         window.onhashchange = function() {
-          // you can access state using history.state
-          self.navigate(url.format(loc));
+          self.navigate(url.format(loc).replace('#', ''));
         };
       }
 
@@ -190,7 +191,7 @@ var Router = function(namespace) {
         window.history.replaceState({}, document.title, url.format(replaceStateUrl));
       }
 
-      self.navigate(url.format(window.location), callback);
+      self.navigate(href, callback);
     };
 
     // client side url navigation
@@ -231,7 +232,7 @@ var Router = function(namespace) {
       if (self.routes[route]) {
         newUrl = app.plugins.router.url(route, params);
 
-        // Test if this href is going to be the same as the current.  
+        // Test if this href is going to be the same as the current.
         // If same, then return b/c there is no reason to re-route.
 
         // TODO:  loc.hash has the query and the hash on it.
@@ -246,7 +247,7 @@ var Router = function(namespace) {
       else {
         var newUrl = url.parse(route);
 
-        // Test if this href is going to be the same as the current.  
+        // Test if this href is going to be the same as the current.
         // If same, then return b/c there is no reason to re-route.
         if (self.initialized &&
             newUrl.pathname === loc.pathname &&
@@ -262,7 +263,7 @@ var Router = function(namespace) {
           newUrl.pathname = self.root + newUrl.hash.slice(1);
           newUrl.hash = null;
 
-        } 
+        }
       }
 
 

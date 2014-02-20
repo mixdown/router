@@ -7,6 +7,10 @@ var Generator = require('./lib/generator.js');
 var MockRequest = require('hammock').Request;
 var MockResponse = require('hammock').Response;
 
+if (typeof(global) === 'undefined') {
+  var global = typeof(window) === 'undefined' ? {} : window;
+}
+
 var Router = function(namespace) {
   namespace = namespace || 'router';
   var instance = this;

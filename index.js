@@ -7,6 +7,9 @@ var Generator = require('./lib/generator.js');
 var MockRequest = require('hammock').Request;
 var MockResponse = require('hammock').Response;
 
+// Load polyfill for url.js bug regarding substr(-1)
+require('substr-polyfill');
+
 if (typeof(global) === 'undefined') {
   var global = typeof(window) === 'undefined' ? {} : window;
 }
@@ -141,14 +144,7 @@ var Router = function(namespace) {
 
     self.listen = function(callback) {
       self._hasPushState = !!(window.history && window.history.pushState);
-      self.root = '/'; // root can be extended with an option later if necessary
-
-      var loc = window.location;
-      var href = url.format(loc);
-
-      // Normalize root to always include a leading and trailing slash.
-      self.root = ('/' + self.root + '/').replace(rootStripper, '/');
-      var atRoot = loc.pathname.replace(/[^\/]$/, '$&/') === self.root;
+      self.root = window.location.pathname;
 
       if (self._hasPushState) {
 
@@ -159,45 +155,18 @@ var Router = function(namespace) {
         // https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history
         // https://developer.mozilla.org/en-US/docs/Web/API/window.onpopstate
 
+        // Previous comment - "WebKit-based browsers fire onpopstate on page load.""
+        // This is only true when the script is evaluated before the page is fully loaded.
+        // This implies that the router is starting to listen before the DOM is completely ready.
         window.onpopstate = function(e) {
-          if (e.state) { // WebKit-based browsers fire onpopstate on page load.
-            self.navigate(url.format(loc));
+          if (e.state) {
+            self.navigate(window.location.href);
           }
         };
 
-      } else {
-
-        href = href.replace('#', '');
-
-        window.onhashchange = function() {
-          self.navigate(url.format(loc).replace('#', ''));
-        };
       }
 
-      var replaceStateUrl = url.parse(window.location.href);
-
-      // If we've started off with a route from a `pushState`-enabled browser, but we're currently in a
-      // browser that doesn't support it...
-      if (!self._hasPushState && !atRoot) {
-
-        replaceStateUrl.pathname = self.root;
-        replaceStateUrl.hash = self.getFragment(null, true);
-
-        window.location.replace(url.format(replaceStateUrl));
-        // Return immediately as browser will do redirect to new url
-        return true;
-
-      // Or if we've started out with a hash-based route, but we're currently in a browser where it could be
-      // `pushState`-based instead...
-      } else if (self._hasPushState && atRoot && loc.hash) {
-
-        replaceStateUrl.pathname = self.root;
-        replaceStateUrl.hash = self.getHash().replace(routeStripper, '');
-
-        window.history.replaceState({}, document.title, url.format(replaceStateUrl));
-      }
-
-      self.navigate(href, callback);
+      self.navigate(window.location.href, callback);
     };
 
     // client side url navigation
@@ -237,41 +206,20 @@ var Router = function(namespace) {
       // If the route is in the route table, then generate the url.  If not, check for hash or finally a literal url.
       if (self.routes[route]) {
         newUrl = app.plugins.router.url(route, params);
-
-        // Test if this href is going to be the same as the current.
-        // If same, then return b/c there is no reason to re-route.
-
-        // TODO:  loc.hash has the query and the hash on it.
-        if (self.initialized && !self._hasPushState && newUrl.pathname == loc.hash && newUrl.search === loc.search) {
-          return null;
-        }
-
-        if (self.initialized && self._hasPushState && newUrl.pathname === loc.pathname && newUrl.search === loc.search) {
-          return null;
-        }
       }
       else {
         var newUrl = url.parse(route);
-
-        // Test if this href is going to be the same as the current.
-        // If same, then return b/c there is no reason to re-route.
-        if (self.initialized &&
-            newUrl.pathname === loc.pathname &&
-            newUrl.search == loc.search &&
-            newUrl.hash == loc.hash
-        ) {
-          return null;
-        }
-
-        if(newUrl.hash) {
-
-          // move the hash route to the url temporarily.
-          newUrl.pathname = self.root + newUrl.hash.slice(1);
-          newUrl.hash = null;
-
-        }
       }
 
+      // Test if this href is going to be the same as the current.
+      // If same, then return b/c there is no reason to re-route.
+      if (self.initialized &&
+          newUrl.pathname === loc.pathname &&
+          newUrl.search == loc.search &&
+          newUrl.hash == loc.hash
+      ) {
+        return null;
+      }
 
       var req = new MockRequest({ url: url.format(newUrl) });
       var res = new MockResponse();
@@ -283,10 +231,13 @@ var Router = function(namespace) {
 
         if (httpContext.url.href !== window.location.href) {
 
+          // html5-history-api should be used to support pushState with hashbangs
           if(self._hasPushState) {
             window.history.pushState({}, document.title, httpContext.url.href);
+
+          // if html5-history-api not loaded, then do an old school href assign.
           } else {
-            window.location.hash = '#' + httpContext.url.path.replace(routeStripper, '');
+            window.location.href = httpContext.url.href;
           }
 
         }

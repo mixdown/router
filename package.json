@@ -20,7 +20,8 @@
   "dependencies": {
     "lodash": "~2.4.1",
     "pipeline-router": "~1.1.8",
-    "hammock": "~0.1.5"
+    "hammock": "~0.1.5",
+    "substr-polyfill": "*"
   },
   "devDependencies": {
     "mocha": "*",

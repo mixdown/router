@@ -119,32 +119,10 @@ var Router = function(namespace) {
       return newRouter;
     };
 
-    // Gets the true hash value. Cannot use location.hash directly due to bug in Firefox where
-    // location.hash will always be decoded.
-    self.getHash = function() {
-      var match = window.location.href.match(/#(.*)$/);
-      return match ? match[1] : '';
-    };
-
-    // Get the cross-browser normalized URL fragment, either from the URL,
-    // the hash, or the override.
-    self.getFragment = function(fragment, forcePushState) {
-      if(fragment == null) {
-        if(self._hasPushState || forcePushState) {
-          fragment = window.location.pathname;
-          var root = self.root.replace(trailingSlash, '');
-          if(!fragment.indexOf(root)) fragment = fragment.slice(root.length);
-        } else {
-          fragment = self.getHash();
-        }
-      }
-
-      return fragment.replace(rootStripper, '');
-    };
-
     self.listen = function(callback) {
       self._hasPushState = !!(window.history && window.history.pushState);
       self.root = window.location.pathname;
+
 
       if (self._hasPushState) {
 
@@ -219,6 +197,12 @@ var Router = function(namespace) {
           newUrl.hash == loc.hash
       ) {
         return null;
+      }
+
+      // old school url change for browsers w/o pushstate or without the polyfill.
+      if (!self._hasPushState && self.initialized) {
+        window.location.href = url.format(newUrl);
+        return;
       }
 
       var req = new MockRequest({ url: url.format(newUrl) });

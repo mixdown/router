@@ -27,7 +27,7 @@
     "mocha": "*",
     "broadway": "~0.2.9"
   },
-  "author": "Tommy at Vast dot com",
+  "author": "Tommy Messbauer",
   "license": "MIT",
   "readmeFilename": "README.md",
   "testling": {

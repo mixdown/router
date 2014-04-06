@@ -27,7 +27,7 @@ var Router = function(namespace) {
     var handlers = options.handlers || instance;
 
     // Cached regex for stripping a leading hash/slash and trailing space.
-    var routeStripper = /^[#\/]|\s+$/g;
+    var routeStripper = /^[#\/]+|\s+$/g;
 
     // Cached regex for stripping leading and trailing slashes.
     var rootStripper = /^\/+|\/+$/g;
@@ -123,9 +123,13 @@ var Router = function(namespace) {
       self._hasPushState = !!(window.history && window.history.pushState);
       self.root = window.location.pathname;
 
+      // Build a URL string for navigating w/o hash or additional search params
+      var getUrlString = function() {
+        var loc = window.location;
+        return loc.protocol + '//' + loc.host + self.root + ((loc.hash) ? loc.hash.replace(routeStripper, '') : loc.search);
+      };
 
       if (self._hasPushState) {
-
         // The popstate event - A popstate event is dispatched to the window every time the active history
         // entry changes. If the history entry being activated was created by a call to pushState or affected
         // by a call to replaceState, the popstate event's state property contains a copy of the history
@@ -137,12 +141,12 @@ var Router = function(namespace) {
         // This is only true when the script is evaluated before the page is fully loaded.
         // This implies that the router is starting to listen before the DOM is completely ready.
         window.onpopstate = function(e) {
-          self.navigate(window.location.href);
+          self.navigate(getUrlString());
         };
 
       }
 
-      self.navigate(window.location.href, callback);
+      self.navigate(getUrlString(), callback);
     };
 
     // client side url navigation

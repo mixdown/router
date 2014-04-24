@@ -6,6 +6,7 @@ var querystring = require('querystring');
 var Generator = require('./lib/generator.js');
 var MockRequest = require('hammock').Request;
 var MockResponse = require('hammock').Response;
+var EventEmitter = require('events').EventEmitter;
 
 // Load polyfill for url.js bug regarding substr(-1)
 require('substr-polyfill');
@@ -34,6 +35,9 @@ var Router = function(namespace) {
 
     // Cached regex for removing a trailing slash.
     var trailingSlash = /\/$/;
+
+    // attach EventEmitter interface
+    var self = this[namespace] = new EventEmitter();
 
     // attach the generator part of the router.
     Generator.constructor.call(instance, namespace);
@@ -201,6 +205,8 @@ var Router = function(namespace) {
         return null;
       }
 
+      self.emit('navigate', newUrl);
+
       // old school url change for browsers w/o pushstate or without the polyfill.
       if (!self._hasPushState && self.initialized) {
         window.location.href = url.format(newUrl);
@@ -216,6 +222,8 @@ var Router = function(namespace) {
         var httpContext = routerData.httpContext;
 
         if (httpContext.url.href !== window.location.href) {
+
+          self.emit('page_loaded', routerData);
 
           // html5-history-api should be used to support pushState with hashbangs
           if(self._hasPushState) {

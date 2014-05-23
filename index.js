@@ -221,9 +221,6 @@ var Router = function(namespace) {
       _clientRouter.once('match', function(routerData) {
         var httpContext = routerData.httpContext;
 
-        // emit page_loaded on all handler matches.
-        self.emit('page_loaded', routerData);
-
         if (httpContext.url.href !== window.location.href) {
 
           // html5-history-api should be used to support pushState with hashbangs
@@ -236,8 +233,12 @@ var Router = function(namespace) {
           }
 
         }
+
         self.location = url.parse(window.location.href);
 
+        // emit page_loaded on all handler matches.
+        self.emit('page_loaded', routerData);
+        
       });
 
       // fire callback once the handler has executed.  Note: javascript is async.  The handler might not be done when this callback is fired... but you already knew that!

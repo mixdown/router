@@ -20,10 +20,10 @@ var Router = function(namespace) {
   var instance = this;
 
   /**
-  * Attaches a router plugin to an application.
-  *
-  **/
-  this.attach = function (options) {
+   * Attaches a router plugin to an application.
+   *
+   **/
+  this.attach = function(options) {
     var app = options.app;
     var handlers = options.handlers || instance;
 
@@ -54,28 +54,26 @@ var Router = function(namespace) {
     };
 
     /**
-    * Creates a new instance of router.
-    *
-    **/
+     * Creates a new instance of router.
+     *
+     **/
     self.create = function() {
       var newRouter = new plRouter();
 
       // browser should never execute timeout.
       if (typeof window !== 'undefined') {
         newRouter.timeout = 0;
-      }
-      else if (options.timeout) {
+      } else if (options.timeout) {
         newRouter.timeout = options.timeout;
       }
 
-      var addParam = function (param, key) {
+      var addParam = function(param, key) {
 
         if (param && param.regex) {
 
           if (param.kind.toLowerCase() === "rest") {
             newRouter.param(key, new RegExp(param.regex));
-          }
-          else if (param.kind.toLowerCase() === 'query') {
+          } else if (param.kind.toLowerCase() === 'query') {
             newRouter.qparam(key, new RegExp(param.regex));
           }
         }
@@ -84,7 +82,7 @@ var Router = function(namespace) {
       var routesWithBadHandlers = [];
 
       // add routes
-      _.each(self.routes, function (route, key) {
+      _.each(self.routes, function(route, key) {
         // if a handler is specified, validate and bind it
         if (route.handler) {
           // if HTML history exists (we are in a browser) and the route is not set to be interpreted
@@ -105,18 +103,18 @@ var Router = function(namespace) {
           if (typeof(handler) === 'function') {
             newRouter.use(
               route.method,
-              route.path,
-              { timeout: route.timeout },
+              route.path, {
+                timeout: route.timeout
+              },
               _.bind(handlers.constructor.prototype._baseHandler, app, handler, route)
             );
-          }
-          else {
+          } else {
             routesWithBadHandlers.push(route.name);
           }
         }
       });
 
-      if(routesWithBadHandlers.length !== 0) {
+      if (routesWithBadHandlers.length !== 0) {
         throw new Error('the following routes have invalid handlers: ' + routesWithBadHandlers.join(' '));
       }
 
@@ -124,13 +122,18 @@ var Router = function(namespace) {
     };
 
     self.listen = function(callback) {
-      self._hasPushState = !!(window.history && window.history.pushState);
+      self._hasPushState = !! (window.history && window.history.pushState);
       self.root = window.location.pathname;
+      self.checkRoot = _.isBoolean(options.checkRoot) ? options.checkRoot : true;
 
       // Build a URL string for navigating w/o hash or additional search params
       var getUrlString = function() {
-        var loc = window.location;
-        return loc.protocol + '//' + loc.host + self.root + ((loc.hash) ? loc.hash.replace(routeStripper, '') : loc.search);
+        if (self.checkRoot) {
+          var loc = window.location;
+          return loc.protocol + '//' + loc.host + self.root + ((loc.hash) ? loc.hash.replace(routeStripper, '') : loc.search);
+        } else {
+          return window.location.href;
+        }
       };
 
       if (self._hasPushState) {
@@ -166,16 +169,15 @@ var Router = function(namespace) {
 
       // handle 2 arg variant function signatures.
       if (arguments.length === 2) {
-         var arg1 = arguments[1];
+        var arg1 = arguments[1];
 
-         if (typeof(arg1) === 'function') {
+        if (typeof(arg1) === 'function') {
           callback = arg1;
           params = null;
-         }
-         else {
+        } else {
           callback = null;
           params = arg1;
-         }
+        }
       }
 
       // keep a single instance around in a browser.
@@ -190,17 +192,16 @@ var Router = function(namespace) {
       // If the route is in the route table, then generate the url.  If not, check for hash or finally a literal url.
       if (self.routes[route]) {
         newUrl = app.plugins.router.url(route, params);
-      }
-      else {
+      } else {
         var newUrl = url.parse(route);
       }
 
       // Test if this href is going to be the same as the current.
       // If same, then return b/c there is no reason to re-route.
       if (self.initialized &&
-          newUrl.pathname === loc.pathname &&
-          newUrl.search == loc.search &&
-          newUrl.hash == loc.hash
+        newUrl.pathname === loc.pathname &&
+        newUrl.search == loc.search &&
+        newUrl.hash == loc.hash
       ) {
         return null;
       }
@@ -213,7 +214,9 @@ var Router = function(namespace) {
         return;
       }
 
-      var req = new MockRequest({ url: url.format(newUrl) });
+      var req = new MockRequest({
+        url: url.format(newUrl)
+      });
       var res = new MockResponse();
 
       // if the route was matched, then change the url.  This will change the url in the address bar before the handler runs.
@@ -224,10 +227,10 @@ var Router = function(namespace) {
         if (httpContext.url.href !== window.location.href) {
 
           // html5-history-api should be used to support pushState with hashbangs
-          if(self._hasPushState) {
+          if (self._hasPushState) {
             window.history.pushState({}, document.title, httpContext.url.href);
 
-          // if html5-history-api not loaded, then do an old school href assign.
+            // if html5-history-api not loaded, then do an old school href assign.
           } else {
             window.location.href = httpContext.url.href;
           }
@@ -238,7 +241,7 @@ var Router = function(namespace) {
 
         // emit page_loaded on all handler matches.
         self.emit('page_loaded', routerData);
-        
+
       });
 
       // fire callback once the handler has executed.  Note: javascript is async.  The handler might not be done when this callback is fired... but you already knew that!
@@ -271,15 +274,14 @@ var Router = function(namespace) {
 
   this.init = function(done) {
     var self = this[namespace];
-    try{
+    try {
       var attempt = self.create();
-    }
-    catch(err){
+    } catch (err) {
       done(err);
       return;
     }
 
-    done(null,self);
+    done(null, self);
   };
 };
 

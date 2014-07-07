@@ -23,121 +23,106 @@ npm install mixdown-router
 
 ## Usage
 
-This plugin consumes declarative route table configuration.  The route table is used to generate urls as well as interpret HTTP requests.
+This plugin is consumes a list of file system paths.  Using the list of paths, it loads controllers found at the path.  If the path is a folder, then if searches the contents on the folder to find compatible controllers.
+
+
+
+## Controller Specification
+
+A controller can end with any suffix and this is configurable.  It is recommended that the controllers end with the suffix ```controller```.  In the example file structure below, the dogs, cats, and lollipops controllers would be loaded, but the ```helpers.js``` file would not be loaded as a controller.
+
+```
+/controllers
+ - dogs.controller
+ - cats.controller
+ - lollipops.controller
+ - helpers.js
+```
+
+### Controller exports
+
+* **path**: {String} [required] path spec for the uri.  This includes any named REST params.  Query params are not specified here as they are typically used to denote optional values.
+* **timeout**: {Number} [optional] Number of milliseconds to wait for the controller to respond to the request before sending back a fail error code.
+* **description**: {String} [optional] Human readable definition of what the route does.
+* **authenticate**: {Boolean} [optional] if true, then the _authenticate() method will be executed for this controller before calling handler.  default: true
+
+
+* **get**: {Function} [optional] Called with this route is matched on a GET method
+* **post**: {Function} [optional] Called with this route is matched on a POST method
+* **put**: {Function} [optional] Called with this route is matched on a PUT method
+* **delete**: {Function} [optional] Called with this route is matched on a DELETE method
+
+* **params**: {Array} [optional] list of params that are valid for this route.  In addition to existence, they are validated during route intepretation and url generation to be valid using the regex.  
+
+There are 2 types of params - query and rest.  
+
+  **Rest params** are added to a path using the following operators ``` :param_name ``` meaning it is required or ``` ?:param_name ``` meaning that it is optional (to support similar paths like this ```/search```, ```/search/```, and ```/search/fido```).
+
+  **Query params** are optional on the url (as is typical with querystring params).
+
+### Example of a controller
+
+```javscript
+
+module.exports.path = '/dogs/search/:search_term';
+module.exports.description = "Performs search for dogs."
+module.exports.timeout = 10000;  // 10 secs
+module.exports.params = {
+  "search_term": {
+    "kind": "rest",
+    "regex": "(.*)",
+    "default": "",
+    "enabled": true
+  },
+  "pagenum": {
+    "kind": "query",
+    "regex": "(\\d+)",
+    "default": "0",
+    "enabled": true
+  },
+  "pagesize": {
+    "kind": "query",
+    "regex": "(\\d+)",
+    "default": "5",
+    "enabled": true
+  }
+};
+
+module.exports.get = function(httpContext) {
+  var app = httpContext.app;
+
+  app.plugins.dogs.search(httpContext.params.search_term).then(function(data) {
+    app.plugins.json(data, httpContext);
+  });
+};
+
+module.exports.post = function(httpContext) {
+
+};
+
+module.exports.put = function(httpContext) {
+
+};
+
+module.exports.delete = function(httpContext) {
+
+};
+
+```
 
 [Unit tests startup a simple node server](https://github.com/mixdown/router/blob/master/test/fixture/server.js).  This could be injected to any framework like mixdown or express.
 
-**routes.json**
-
-```javascript
-{
-  "search": {
-    "method": "GET",
-    "path": "/dogs/:gender/:bark/:age",
-    "handler": "dogs",
-    "params": {
-      "bark": {
-        "regex": "bark-(loud|quiet)",
-        "kind": "rest",
-        "enabled": true
-      },
-      "gender": {
-        "regex": "(\\w+)",
-        "kind": "rest",
-        "enabled": true
-      },
-      "age": {
-        "regex": "(\\d+)",
-        "kind": "rest",
-        "enabled": true
-      }
-    }
-  },
-
-  "single": {
-    "method": "GET",
-    "path": "/dog/:id",
-    "handler": "dog",
-    "params": {
-      "hidePictures": {
-        "kind": "query",
-        "regex": "(true|false)",
-        "enabled": true
-      },
-      "id": {
-        "regex": "(\\d{1})",
-        "kind": "rest",
-        "enabled": true
-      }
-    }
-  },
-
-  "home": {
-    "method": "GET",
-    "path": "/",
-    "handler": "index",
-    "params": {}
-  }
-}
-```
-
-**server.js** 
-
-```javasript
-var broadway = require('broadway');
-var Router = require('./router.js');
-var http = require('http');
-
-var app = {
-  id: 'mixdown-router-unit-test',
-  plugins: new broadway.App()
-};
-
-// attach the router instance, injecting the route table.
-app.plugins.use(new Router(), {
-  app: app,
-  timeout: 3000,  // 3s timeout
-  routes: require('./routes.json')
-});
-
-// export the start function which sets up the server and app.
-// If you use Mixdown to initialize the server, then this is done for you in one of the "main" plugins.
-
-module.exports.start = function(callback) {
-
-  // setup an httpServer
-  app.plugins.init(function(err) {
-
-    // if failed, then kill the app b/c the routes are incorrectly configured.
-    if (err) {
-      console.error(err);
-      process.exit();
-    }
-
-    // create the server and listen for requests.
-    http.createServer(function (req, res) {
-
-      app.plugins.router.create().dispatch(req, res);
-
-    }).listen(8081, function(err) {
-      callback(err, { app: app });
-    });
-    
-  });
-};
-```
-
 ## Plugin Configuration
 
-* **routes**: [required] This block contains the route table manifest.  See Manifest Specification below.
+* **controllers**: [required] This block contains information to generate routes, controllers, and handlers.
+* **controllers.file_extension**: {String} [optional] File extension to be used when searching for controllers.  default: ```.controller```
+* **controllers.paths**: {Array} [required] List of file system paths to serach for controllers.  This is used to generate a manifest in the form of the Manifest Specification below.
 
 * **timeout**: [optional] Global router setting.  Number of milliseconds to wait before sending a 500 and timeout to the client.  This will avoid hanging sockets if your controller never writes the response (usually this is in error).  Default is set in the [pipeline-router dependency here](https://github.com/tommydudebreaux/pipeline-router/blob/master/index.js#L33).  Currently ```120000``` or 2 minutes, same as node.js socket timeout.
 
-Routes hash contains format strings for the routes.  These are the same as [pipeline-router](https://github.com/tommydudebreaux/pipeline-router "pipeline-router").
-
 ## Manifest Specification
 
-The routes hash is a list of named routes that look a lot like the [node.js url object](http://nodejs.org/api/url.html), but with more properties for specifying parameters.
+The route table is a hash of named routes that look a lot like the [node.js url object](http://nodejs.org/api/url.html), but with more properties for specifying parameters.  They are generated from the controller object.
 
 * **method**: [optional] The http verb to interpret.  same as the node.js url object.  default ```GET```
 * **protocol**: [optional] Same as the node.js url object.  ex: http, https.  This is handy for specifying urls to resources from a different domain than your node server.  (ex: CDN resource)

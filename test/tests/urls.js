@@ -1,7 +1,6 @@
-var Router = require('../fixture/router.js');
+var Router = require('../../index.js');
 var assert = require('assert');
 var broadway = require('broadway');
-var routes = require('../fixture/routes.json');
 var _ = require('lodash');
 
 suite('Initialization', function() {
@@ -10,14 +9,39 @@ suite('Initialization', function() {
     plugins: new broadway.App()
   };
 
+  var initComplete = false; // to prevent re-init on multiple tests since each test uses same instance.
+
   setup(function(done) {
 
-    app.plugins.use(new Router(), {
-      timeout: 3000,  // 3s timeout
-      routes: routes
-    });
+    if (!initComplete) {
+      app.plugins.use(new Router(), {
+        timeout: 3000, // 3s timeout
+        paths: [{
+          path: './test/fixture/controllers/api_v1',
+          url_prefix: '/api/v1'
+        }, {
+          path: './test/fixture/controllers/api_v2'
+        }, {
+          path: './test/fixture/controllers/pages',
+          url_prefix: '',
+          add_namespace: false
+        }]
+      });
 
-    app.plugins.init(done);
+      // app.plugins.router.on('no-browser-handler', function(data) {
+      //   console.log(data);
+      // });
+
+      app.plugins.router.on('invalid-route', function(data) {
+        console.log(data, data.err.stack);
+      });
+
+
+      app.plugins.init(done);
+      initComplete = true;
+    } else {
+      done();
+    }
   });
 
 
@@ -28,8 +52,8 @@ suite('Initialization', function() {
       bark: 'loud'
     };
 
-    var uri = app.plugins.router.url('search', params);
-    var url = app.plugins.router.format('search', params);
+    var uri = app.plugins.router.url('api_v2/dogs_search', params);
+    var url = app.plugins.router.format('api_v2/dogs_search', params);
     var gold = {
       pathname: '/dogs/female/bark-loud/6',
       query: null
@@ -39,7 +63,7 @@ suite('Initialization', function() {
     assert.equal(uri.query, null, 'Query should not exist.');
     assert.equal(url, gold.pathname, 'Formatted url should match expected value.');
     done();
-  });   
+  });
 
   test('Test url generation for query params', function(done) {
     var params = {
@@ -47,15 +71,17 @@ suite('Initialization', function() {
       id: 1234
     };
 
-    var uri = app.plugins.router.url('single', params);
-    var url = app.plugins.router.format('single', params);
+    var uri = app.plugins.router.url('api_v2/dog', params);
+    var url = app.plugins.router.format('api_v2/dog', params);
 
     var gold = {
       protocol: null,
       host: null,
       hostname: null,
       pathname: '/dog/1234',
-      query: { hidePictures: 'true' },
+      query: {
+        hidePictures: 'true'
+      },
       search: '?hidePictures=true',
       path: '/dog/1234?hidePictures=true',
 
@@ -71,7 +97,7 @@ suite('Initialization', function() {
     assert.equal(uri.protocol, gold.protocol, 'Protocol should match expected object.');
     assert.equal(url, goldUrl, 'Formatted url should match expected value.');
     done();
-  }); 
+  });
 
 
 });

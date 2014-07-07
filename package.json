@@ -23,7 +23,6 @@
     "hammock": "~0.1.5",
     "lodash": "~2.4.1",
     "mkdirp": "^0.5.0",
-    "pipeline-router": "~1.2.5",
     "substr-polyfill": "*"
   },
   "devDependencies": {
@@ -73,9 +72,9 @@
       ]
     },
     "files": [
-      "tests/tap/init.js",
-      "tests/tap/routetable.js",
-      "tests/tap/urls.js"
+      "test/tests/init.js",
+      "test/tests/routetable.js",
+      "test/tests/urls.js"
     ]
   }
 }

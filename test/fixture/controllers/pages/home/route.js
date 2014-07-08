@@ -1,5 +1,5 @@
 var dogList = require('../../../lib/dog_db.js');
-
+var _ = require('lodash');
 
 module.exports = {
   path: "/",
@@ -8,12 +8,12 @@ module.exports = {
   get: function(httpContext) {
     var res = httpContext.response;
     var data = _.map(dogList.dogList, function(dog) {
-      return [dog.id, dog.breed].join(' ');
+      return dog.breed;
     });
 
     res.writeHead(200, {
       'Content-Type': 'text/plain'
     });
-    res.end(JSON.stringify(data));
+    res.end(data.join());
   }
 };

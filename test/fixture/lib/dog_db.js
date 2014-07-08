@@ -1,3 +1,5 @@
+var _ = require('lodash');
+
 var dogList = [{
   id: 1,
   breed: 'boxer',

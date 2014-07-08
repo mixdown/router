@@ -11,7 +11,7 @@ module.exports = {
         "regex": "(\\d{1})"
       }
     },
-    "path": "/api/v1/dog/:id",
+    "path": "/api/v1/dog/?:id",
     "post": true,
     "put": true,
     "timeout": 3000
@@ -50,7 +50,7 @@ module.exports = {
         "regex": "(\\d{1})"
       }
     },
-    "path": "api_v2/dog/:id",
+    "path": "api_v2/dog/?:id",
     "post": true,
     "put": true,
     "timeout": 3000

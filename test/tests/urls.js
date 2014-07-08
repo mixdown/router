@@ -1,46 +1,17 @@
-var Router = require('../../index.js');
+var createApp = require('../fixture/app.js');
 var assert = require('assert');
-var broadway = require('broadway');
 var _ = require('lodash');
 
 suite('Initialization', function() {
 
-  var app = {
-    plugins: new broadway.App()
-  };
-
-  var initComplete = false; // to prevent re-init on multiple tests since each test uses same instance.
+  var app;
 
   setup(function(done) {
-
-    if (!initComplete) {
-      app.plugins.use(new Router(), {
-        timeout: 3000, // 3s timeout
-        paths: [{
-          path: './test/fixture/controllers/api_v1',
-          url_prefix: '/api/v1'
-        }, {
-          path: './test/fixture/controllers/api_v2'
-        }, {
-          path: './test/fixture/controllers/pages',
-          url_prefix: '',
-          add_namespace: false
-        }]
-      });
-
-      // app.plugins.router.on('no-browser-handler', function(data) {
-      //   console.log(data);
-      // });
-
-      app.plugins.router.on('invalid-route', function(data) {
-        console.log(data, data.err.stack);
-      });
-
-
-      app.plugins.init(done);
-      initComplete = true;
-    } else {
+    if (app) {
       done();
+    } else {
+      app = createApp();
+      app.plugins.init(done);
     }
   });
 

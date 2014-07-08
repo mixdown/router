@@ -1,7 +1,7 @@
 var dogList = require('../../../lib/dog_db.js');
 
 module.exports = {
-  path: "/dog/:id",
+  path: "/dog/?:id",
   description: "CRUD for a dog record.",
   params: {
     hidePictures: {
@@ -26,15 +26,44 @@ module.exports = {
   },
 
   post: function(httpContext) {
-    httpContext.response.end('Not Supported.');
+    var res = httpContext.response;
+    var data = {
+      ok: true,
+      id: httpContext.body.id,
+      body: httpContext.body
+    };
+
+    res.writeHead(200, {
+      'Content-Type': 'application/json'
+    });
+    res.end(JSON.stringify(data));
   },
 
   put: function(httpContext) {
-    httpContext.response.end('Not Supported.');
+    debugger;
+    var res = httpContext.response;
+    var data = {
+      ok: true,
+      id: httpContext.body.id
+    };
+
+    res.writeHead(200, {
+      'Content-Type': 'application/json'
+    });
+    res.end(JSON.stringify(data));
   },
 
   delete: function(httpContext) {
-    httpContext.response.end('Not Supported.');
+    var res = httpContext.response;
+    var data = {
+      ok: true,
+      id: httpContext.params.id
+    };
+
+    res.writeHead(200, {
+      'Content-Type': 'application/json'
+    });
+    res.end(JSON.stringify(data));
   }
 
 };

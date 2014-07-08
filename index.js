@@ -16,7 +16,7 @@ var RouterPlugin = function(namespace) {
 
     self = this[namespace] = new events.EventEmitter();
     controllers = new ControllerFactory(options);
-    debugger;
+
     // attach the generator part of the router.
     var gen = new Generator(namespace);
     gen.attach.call(this, options);

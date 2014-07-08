@@ -1,7 +1,7 @@
 var dogList = require('../../../lib/dog_db.js');
 
 module.exports = {
-  path: "/dog/:id",
+  path: "/dog/?:id",
   description: "CRUD for a dog record.",
   params: {
     id: {

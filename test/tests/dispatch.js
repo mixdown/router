@@ -109,7 +109,7 @@ suite('Dispatch', function() {
 
   });
 
-  test('Test PUT w/ url encoding', function(done) {
+  test('Test PUT w/ urlencoding body', function(done) {
     var id = Math.ceil(Math.random() * 10000);
     var gold = {
       ok: true,
@@ -137,6 +137,40 @@ suite('Dispatch', function() {
 
     router.dispatch(req, res);
     req.write(querystring.stringify({
+      id: id
+    }));
+    req.end();
+
+  });
+
+  test('Test POST w/ json encoded body', function(done) {
+    var id = Math.ceil(Math.random() * 10000);
+    var gold = {
+      ok: true,
+      id: id
+    };
+
+    var req = new Request({
+      url: app.plugins.router.format('api_v2/dog'),
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json'
+      }
+    });
+    console.log(req.url);
+
+    var res = new Response();
+    var router = app.plugins.router.create();
+
+    res.on('end', function(err, data) {
+      console.log(data.body);
+      assert.equal(res.statusCode, 200, 'Response should not return err');
+      assert.deepEqual(JSON.parse(data.body), gold, 'Should return correct result.');
+      done();
+    });
+
+    router.dispatch(req, res);
+    req.write(JSON.stringify({
       id: id
     }));
     req.end();

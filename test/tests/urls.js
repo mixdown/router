@@ -26,7 +26,7 @@ suite('Initialization', function() {
     var uri = app.plugins.router.url('api_v2/dogs_search', params);
     var url = app.plugins.router.format('api_v2/dogs_search', params);
     var gold = {
-      pathname: '/dogs/female/bark-loud/6',
+      pathname: '/api_v2/dogs/female/bark-loud/6',
       query: null
     };
 
@@ -49,15 +49,15 @@ suite('Initialization', function() {
       protocol: null,
       host: null,
       hostname: null,
-      pathname: '/dog/1234',
+      pathname: '/api_v2/dog/1234',
       query: {
         hidePictures: 'true'
       },
       search: '?hidePictures=true',
-      path: '/dog/1234?hidePictures=true',
+      path: '/api_v2/dog/1234?hidePictures=true',
 
     };
-    var goldUrl = '/dog/1234?hidePictures=true';
+    var goldUrl = '/api_v2/dog/1234?hidePictures=true';
 
     assert.equal(uri.pathname, gold.pathname, 'Pathname should match the expected url.');
     assert.equal(uri.path, gold.path, 'Path should match the expected url.');

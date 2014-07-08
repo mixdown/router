@@ -29,8 +29,7 @@ module.exports = {
     var res = httpContext.response;
     var data = {
       ok: true,
-      id: httpContext.body.id,
-      body: httpContext.body
+      id: httpContext.body.id
     };
 
     res.writeHead(200, {
@@ -40,7 +39,6 @@ module.exports = {
   },
 
   put: function(httpContext) {
-    debugger;
     var res = httpContext.response;
     var data = {
       ok: true,

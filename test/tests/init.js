@@ -7,7 +7,19 @@ var validate_manifest = function(manifest) {
   _.each(manifest, function(route, name) {
 
     _.each(route, function(v, k) {
-      assert.deepEqual(v, gold_manifest[name][k], 'Manifest should be correct for route: ' + name + '[' + k + ']');
+
+      if (k === 'params') {
+        _.each(v, function(pv, pk) {
+          if (pk === 'regex') {
+            assert.deepEqual(pv.source, v[pk], 'Manifest should be correct for route: ' + name + '.params[' + pk + ']');
+          } else {
+            assert.deepEqual(pv, v[pk], 'Manifest should be correct for route: ' + name + '.params[' + pk + ']');
+          }
+        });
+      } else {
+        assert.deepEqual(v, gold_manifest[name][k], 'Manifest should be correct for route: ' + name + '[' + k + ']');
+      }
+
     });
 
   });

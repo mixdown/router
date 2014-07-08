@@ -6,6 +6,7 @@ module.exports = {
     "get": true,
     "params": {
       "id": {
+        "name": "id",
         "enabled": true,
         "kind": "rest",
         "regex": "(\\d{1})"
@@ -23,6 +24,7 @@ module.exports = {
     "get": true,
     "params": {
       "age": {
+        "name": "age",
         "enabled": true,
         "kind": "rest",
         "regex": "(\\d+)"
@@ -40,17 +42,19 @@ module.exports = {
     "get": true,
     "params": {
       "hidePictures": {
+        "name": "hidePictures",
         "enabled": true,
         "kind": "query",
         "regex": "(true|false)"
       },
       "id": {
+        "name": "id",
         "enabled": true,
         "kind": "rest",
         "regex": "(\\d{1})"
       }
     },
-    "path": "api_v2/dog/?:id",
+    "path": "/api_v2/dog/?:id",
     "post": true,
     "put": true,
     "timeout": 3000
@@ -62,22 +66,25 @@ module.exports = {
     "get": true,
     "params": {
       "age": {
+        "name": "age",
         "enabled": true,
         "kind": "rest",
         "regex": "(\\d+)"
       },
       "bark": {
+        "name": "bark",
         "enabled": true,
         "kind": "rest",
         "regex": "bark-(loud|quiet)"
       },
       "gender": {
+        "name": "gender",
         "enabled": true,
         "kind": "rest",
         "regex": "(\\w+)"
       }
     },
-    "path": "api_v2/dogs/:gender/:bark/:age",
+    "path": "/api_v2/dogs/:gender/:bark/:age",
     "post": true,
     "put": false,
     "timeout": 6000
@@ -89,6 +96,7 @@ module.exports = {
     "get": true,
     "params": {
       "id": {
+        "name": "id",
         "enabled": true,
         "kind": "rest",
         "regex": "(\\d{1})"

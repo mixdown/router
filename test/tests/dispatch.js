@@ -14,16 +14,16 @@ suite('Dispatch', function() {
       done();
     } else {
       app = createApp();
-      app.plugins.init(done);
+      app.setup(done);
     }
   });
 
   test('Get Page', function(done) {
     var req = new Request({
-      url: app.plugins.router.format('home')
+      url: app.router.format('home')
     });
     var res = new Response();
-    var router = app.plugins.router.create();
+    var router = app.router.create();
 
     res.on('end', function(err, data) {
       console.log(data.body);
@@ -58,10 +58,10 @@ suite('Dispatch', function() {
     }];
 
     var req = new Request({
-      url: app.plugins.router.format('api_v2/dogs_search', params)
+      url: app.router.format('api_v2/dogs_search', params)
     });
     var res = new Response();
-    var router = app.plugins.router.create();
+    var router = app.router.create();
 
     // console.log(req.url);
 
@@ -92,11 +92,11 @@ suite('Dispatch', function() {
     };
 
     var req = new Request({
-      url: app.plugins.router.format('api_v2/dog', params),
+      url: app.router.format('api_v2/dog', params),
       method: 'DELETE'
     });
     var res = new Response();
-    var router = app.plugins.router.create();
+    var router = app.router.create();
 
     res.on('end', function(err, data) {
       console.log(data.body);
@@ -117,7 +117,7 @@ suite('Dispatch', function() {
     };
 
     var req = new Request({
-      url: app.plugins.router.format('api_v2/dog'),
+      url: app.router.format('api_v2/dog'),
       method: 'PUT',
       headers: {
         'content-type': 'application/www-urlencoded'
@@ -126,7 +126,7 @@ suite('Dispatch', function() {
     console.log(req.url);
 
     var res = new Response();
-    var router = app.plugins.router.create();
+    var router = app.router.create();
 
     res.on('end', function(err, data) {
       console.log(data.body);
@@ -151,7 +151,7 @@ suite('Dispatch', function() {
     };
 
     var req = new Request({
-      url: app.plugins.router.format('api_v2/dog'),
+      url: app.router.format('api_v2/dog'),
       method: 'POST',
       headers: {
         'content-type': 'application/json'
@@ -160,7 +160,7 @@ suite('Dispatch', function() {
     console.log(req.url);
 
     var res = new Response();
-    var router = app.plugins.router.create();
+    var router = app.router.create();
 
     res.on('end', function(err, data) {
       console.log(data.body);

@@ -1,12 +1,10 @@
 var Router = require('../../index.js');
-var broadway = require('broadway');
+var App = require('mixdown-app').App;
 
 module.exports = function() {
-  var app = {
-    plugins: new broadway.App()
-  };
+  var app = new App();
 
-  app.plugins.use(new Router(), {
+  app.use(new Router({
     timeout: 3000, // 3s timeout
     paths: [{
       path: './test/fixture/controllers/api_v1',
@@ -18,13 +16,13 @@ module.exports = function() {
       url_prefix: '',
       add_namespace: false
     }]
-  });
+  }), 'router');
 
-  // app.plugins.router.on('no-browser-handler', function(data) {
+  // app.router.on('no-browser-handler', function(data) {
   //   console.log(data);
   // });
 
-  app.plugins.router.on('invalid-route', function(data) {
+  app.router.on('invalid-route', function(data) {
     console.log(data, data.err.stack);
   });
 

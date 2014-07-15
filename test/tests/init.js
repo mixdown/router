@@ -34,28 +34,28 @@ suite('Initialization', function() {
       done();
     } else {
       app = createApp();
-      app.plugins.init(done);
+      app.setup(done);
     }
   });
 
 
   test('Router plugin should attach', function(done) {
-    // console.log(JSON.stringify(app.plugins.router.manifest()));
-    assert.ok(app.plugins.router, 'Router interface exists on plugins');
-    assert.ok(app.plugins.router.create, 'Router.create interface exists on plugins');
-    assert.ok(app.plugins.router.url, 'Router.url interface exists on plugins');
-    assert.ok(app.plugins.router.format, 'Router.format interface exists on plugins');
+    // console.log(JSON.stringify(app.router.manifest()));
+    assert.ok(app.router, 'Router interface exists on plugins');
+    assert.ok(app.router.create, 'Router.create interface exists on plugins');
+    assert.ok(app.router.url, 'Router.url interface exists on plugins');
+    assert.ok(app.router.format, 'Router.format interface exists on plugins');
 
-    assert.ok(Object.keys(app.plugins.router.manifest()).length, 6, 'Manifest should contain 6 routes');
+    assert.ok(Object.keys(app.router.manifest()).length, 6, 'Manifest should contain 6 routes');
 
-    validate_manifest(app.plugins.router.manifest());
+    validate_manifest(app.router.manifest());
 
     done();
   });
 
   test('Create router instance', function(done) {
 
-    var router = app.plugins.router.create();
+    var router = app.router.create();
     //console.log(router.manifest());
     assert.ok(router, 'Router instance exists');
     assert.ok(Object.keys(router.manifest()).length, 6, 'Manifest should contain 6 routes');

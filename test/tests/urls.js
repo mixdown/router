@@ -11,7 +11,7 @@ suite('Initialization', function() {
       done();
     } else {
       app = createApp();
-      app.plugins.init(done);
+      app.setup(done);
     }
   });
 
@@ -23,8 +23,8 @@ suite('Initialization', function() {
       bark: 'loud'
     };
 
-    var uri = app.plugins.router.url('api_v2/dogs_search', params);
-    var url = app.plugins.router.format('api_v2/dogs_search', params);
+    var uri = app.router.url('api_v2/dogs_search', params);
+    var url = app.router.format('api_v2/dogs_search', params);
     var gold = {
       pathname: '/api_v2/dogs/female/bark-loud/6',
       query: null
@@ -42,8 +42,8 @@ suite('Initialization', function() {
       id: 1234
     };
 
-    var uri = app.plugins.router.url('api_v2/dog', params);
-    var url = app.plugins.router.format('api_v2/dog', params);
+    var uri = app.router.url('api_v2/dog', params);
+    var url = app.router.format('api_v2/dog', params);
 
     var gold = {
       protocol: null,

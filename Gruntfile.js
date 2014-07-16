@@ -23,10 +23,29 @@ module.exports = function(grunt) {
 
       }
 
+    },
+
+    'mixdown-router': {
+      options: {
+        router_template: './test/fixture/browser/helper/router_template.js.tpl',
+        dest: './test/fixture/browser/router.js',
+        paths: [{
+          path: './test/fixture/controllers/api_v1',
+          url_prefix: '/api/v1'
+        }, {
+          path: './test/fixture/controllers/api_v2'
+        }, {
+          path: './test/fixture/controllers/pages',
+          url_prefix: '',
+          add_namespace: false
+        }]
+      }
     }
   });
 
   grunt.loadNpmTasks('grunt-http-server');
+  grunt.task.loadTasks('./tasks');
 
-  grunt.registerTask('default', ['http-server:dev']);
+  grunt.registerTask('default', ['browser', 'http-server:dev']);
+  grunt.registerTask('browser', ['mixdown-router']);
 };

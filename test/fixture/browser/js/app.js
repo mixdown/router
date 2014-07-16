@@ -1,4 +1,4 @@
-var Router = require('../../../../index.js');
+var Router = require('../router.js');
 var App = require('mixdown-app').App;
 
 module.exports = function() {

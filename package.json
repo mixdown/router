@@ -4,7 +4,7 @@
   "description": "Router for mixdown.js",
   "main": "index.js",
   "scripts": {
-    "test": "mocha -R spec -u tdd test/tests/*.js && browserify ./test/fixture/browser/_main.js > ./test/fixture/browser/main.js && mocha-phantomjs -s local-to-remote-url-access=yes -R spec -u tdd http://localhost:8282/index.html"
+    "test": "mocha -R spec -u tdd test/tests/*.js && grunt browser && browserify ./test/fixture/browser/_main.js > ./test/fixture/browser/main.js && mocha-phantomjs -s local-to-remote-url-access=yes -R spec -u tdd http://localhost:8282/index.html"
   },
   "repository": {
     "type": "git",

@@ -4,11 +4,12 @@ module.exports = {
     "delete": true,
     "description": "CRUD for a dog record.",
     "get": true,
+    "name": "api_v1/dog",
     "params": {
       "id": {
-        "name": "id",
         "enabled": true,
         "kind": "rest",
+        "name": "id",
         "regex": "(\\d{1})"
       }
     },
@@ -22,11 +23,12 @@ module.exports = {
     "delete": false,
     "description": "Search for dogs",
     "get": true,
+    "name": "api_v1/dogs_search",
     "params": {
       "age": {
-        "name": "age",
         "enabled": true,
         "kind": "rest",
+        "name": "age",
         "regex": "(\\d+)"
       }
     },
@@ -40,17 +42,18 @@ module.exports = {
     "delete": true,
     "description": "CRUD for a dog record.",
     "get": true,
+    "name": "api_v2/dog",
     "params": {
       "hidePictures": {
-        "name": "hidePictures",
         "enabled": true,
         "kind": "query",
-        "regex": "(true|false)"
+        "name": "hidePictures",
+        "regex": "_PxEgEr_/(true|false)/"
       },
       "id": {
-        "name": "id",
         "enabled": true,
         "kind": "rest",
+        "name": "id",
         "regex": "(\\d{1})"
       }
     },
@@ -64,23 +67,24 @@ module.exports = {
     "delete": false,
     "description": "Search for dogs",
     "get": true,
+    "name": "api_v2/dogs_search",
     "params": {
       "age": {
-        "name": "age",
         "enabled": true,
         "kind": "rest",
+        "name": "age",
         "regex": "(\\d+)"
       },
       "bark": {
-        "name": "bark",
         "enabled": true,
         "kind": "rest",
+        "name": "bark",
         "regex": "bark-(loud|quiet)"
       },
       "gender": {
-        "name": "gender",
         "enabled": true,
         "kind": "rest",
+        "name": "gender",
         "regex": "(\\w+)"
       }
     },
@@ -91,14 +95,16 @@ module.exports = {
   },
   "dog_view": {
     "browser": true,
+    "browser_handler": "function (httpContext) {\n  document.getElementById('output').innerHTML = httpContext.route + ':' + querystring.stringify(httpContext.params);\n}",
     "delete": false,
     "description": "Shows a dog page.",
     "get": true,
+    "name": "dog_view",
     "params": {
       "id": {
-        "name": "id",
         "enabled": true,
         "kind": "rest",
+        "name": "id",
         "regex": "(\\d{1})"
       }
     },
@@ -109,9 +115,11 @@ module.exports = {
   },
   "home": {
     "browser": true,
+    "browser_handler": "function (httpContext) {\n  document.getElementById('output').innerHTML = httpContext.route + ':' + JSON.stringify(httpContext.params);\n}",
     "delete": false,
     "description": "Home page.",
     "get": true,
+    "name": "home",
     "params": {},
     "path": "/",
     "post": false,

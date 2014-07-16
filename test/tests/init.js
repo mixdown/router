@@ -1,4 +1,4 @@
-var createApp = require('../fixture/app.js');
+var createApp = require('../fixture/server/app.js');
 var assert = require('assert');
 var _ = require('lodash');
 var gold_manifest = require('../fixture/gold_manifest.js');
@@ -16,6 +16,8 @@ var validate_manifest = function(manifest) {
             assert.deepEqual(pv, v[pk], 'Manifest should be correct for route: ' + name + '.params[' + pk + ']');
           }
         });
+      } else if (k === 'browser_handler') {
+        assert.ok(typeof(v), 'function', 'Manifest should be correct for route: ' + name + '[' + k + ']');
       } else {
         assert.deepEqual(v, gold_manifest[name][k], 'Manifest should be correct for route: ' + name + '[' + k + ']');
       }
@@ -48,6 +50,9 @@ suite('Initialization', function() {
 
     assert.ok(Object.keys(app.router.manifest()).length, 6, 'Manifest should contain 6 routes');
 
+    // var ws = (require('fs')).createWriteStream((require('path')).join(process.cwd(), 'out.js'));
+    // ws.write(app.router.manifest(true));
+    // ws.end();
     validate_manifest(app.router.manifest());
 
     done();

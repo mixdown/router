@@ -1,3 +1,3 @@
 module.exports = function(httpContext) {
-  alert(httpContext.params);
+  document.getElementById('output').innerHTML = httpContext.route + ':' + JSON.stringify(httpContext.params);
 };

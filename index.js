@@ -1,12 +1,11 @@
 var _ = require('lodash');
 var ControllerFactory = require('./lib/controller_factory.js');
 var Router = require('./lib/router.js');
+var url = require('url');
 var Generator = require('./lib/generator.js');
 var events = require('events');
-
-if (typeof(window) === 'undefined') {
-  var window = {};
-}
+var MockRequest = require('hammock').Request;
+var MockResponse = require('hammock').Response;
 
 module.exports = Generator.extend({
 
@@ -33,15 +32,15 @@ module.exports = Generator.extend({
 
   controllers: null,
   clientRouter: null,
-  root: window.location ? window.location.pathname : null,
+  root: typeof(window) !== 'undefined' && window.location ? window.location.pathname : null,
 
   hasPushState: function() {
     return !!(window.history && window.history.pushState);
   },
 
   // Functions that use the route table and controller manifest.
-  manifest: function() {
-    return this.controllers.manifest();
+  manifest: function(raw) {
+    return this.controllers.manifest(raw);
   },
 
   // creates a router instance. This is the single server side node interface.
@@ -87,7 +86,7 @@ module.exports = Generator.extend({
 
     // If the route is in the route table, then generate the url.  If not, check for hash or finally a literal url.
     if (this.manifest()[route]) {
-      newUrl = app.plugins.router.url(route, params);
+      newUrl = this.url(route, params);
     } else {
       newUrl = url.parse(route);
     }
@@ -115,10 +114,13 @@ module.exports = Generator.extend({
     });
     var res = new MockResponse();
 
+    this.clientRouter.once('error', function(err) {
+      console.log(err.stack);
+    });
+
     // if the route was matched, then change the url.  This will change the url in the address bar before the handler runs.
     // This is good for devs for the situation where there is a problem with the controller handler which will cause the pipeline to stop.
-    this.clientRouter.once('match', function(routerData) {
-      var httpContext = routerData.httpContext;
+    this.clientRouter.once('match', function(httpContext) {
 
       if (httpContext.url.href !== window.location.href) {
 
@@ -137,22 +139,16 @@ module.exports = Generator.extend({
       self.location = url.parse(window.location.href);
 
       // emit page_loaded on all handler matches.
-      self.emit('page_loaded', routerData);
+      self.emit('page_loaded', httpContext);
 
     });
 
     // fire callback once the handler has executed.  Note: javascript is async.  The handler might not be done when this callback is fired... but you already knew that!
-    _clientRouter.once('end', function(err, results) {
+    if (typeof(callback) === 'function') {
+      this.clientRouter.once('end', callback);
+    }
 
-      typeof(callback) === 'function' ? callback(err, {
-        matched: results[0].matched,
-        res: res,
-        req: req
-      }) : null;
-
-    });
-
-    _clientRouter.dispatch(req, res);
+    this.clientRouter.dispatch(req, res);
 
     return req;
   },

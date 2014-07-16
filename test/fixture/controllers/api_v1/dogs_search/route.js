@@ -1,4 +1,4 @@
-var dogList = require('../../../lib/dog_db.js');
+var dogList = require('../../../server/lib/dog_db.js');
 
 module.exports = {
   path: "/dogs/:age",

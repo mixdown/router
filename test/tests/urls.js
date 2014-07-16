@@ -1,4 +1,4 @@
-var createApp = require('../fixture/app.js');
+var createApp = require('../fixture/server/app.js');
 var assert = require('assert');
 var _ = require('lodash');
 

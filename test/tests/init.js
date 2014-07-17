@@ -16,8 +16,6 @@ var validate_manifest = function(manifest) {
             assert.deepEqual(pv, v[pk], 'Manifest should be correct for route: ' + name + '.params[' + pk + ']');
           }
         });
-      } else if (k === 'browser_handler') {
-        assert.ok(typeof(v), 'function', 'Manifest should be correct for route: ' + name + '[' + k + ']');
       } else {
         assert.deepEqual(v, gold_manifest[name][k], 'Manifest should be correct for route: ' + name + '[' + k + ']');
       }

@@ -21,13 +21,13 @@
     "async": "^0.9.0",
     "formidable": "^1.0.15",
     "hammock": "^0.1.9",
-    "json-fn": "^0.60.0",
     "lodash": "^2.4.1",
     "mixdown-app": "^3.0.4",
     "mkdirp": "^0.5.0",
     "uuid-lib": "0.0.6"
   },
   "devDependencies": {
+    "browserify": "^4.2.1",
     "grunt": "^0.4.5",
     "grunt-http-server": "0.0.5",
     "mocha": "^1.20.1"

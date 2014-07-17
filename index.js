@@ -39,8 +39,8 @@ module.exports = Generator.extend({
   },
 
   // Functions that use the route table and controller manifest.
-  manifest: function(raw) {
-    return this.controllers.manifest(raw);
+  manifest: function() {
+    return this.controllers.manifest();
   },
 
   // creates a router instance. This is the single server side node interface.

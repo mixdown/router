@@ -14,12 +14,12 @@ module.exports = function(grunt) {
     // Merge task-specific and/or target-specific options with these defaults.
     var options = this.options({
       dest: './browser_controllers.js',
-      router_template: './router_template.js.tpl'
+      router_template: require.resolve('./router_template.js.tpl')
     });
 
     // ControllerFactory generates the controllers from config.
     var cf = new ControllerFactory(options);
-    var module_source = grunt.file.read(require.resolve(options.router_template));
+    var module_source = grunt.file.read(options.router_template);
     var handlers = [];
 
     // init controllers which crawls and builds manifest

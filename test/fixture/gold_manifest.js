@@ -95,7 +95,6 @@ module.exports = {
   },
   "dog_view": {
     "browser": true,
-    "browser_handler": "function (httpContext) {\n  document.getElementById('output').innerHTML = httpContext.route + ':' + querystring.stringify(httpContext.params);\n}",
     "delete": false,
     "description": "Shows a dog page.",
     "get": true,
@@ -115,7 +114,6 @@ module.exports = {
   },
   "home": {
     "browser": true,
-    "browser_handler": "function (httpContext) {\n  document.getElementById('output').innerHTML = httpContext.route + ':' + JSON.stringify(httpContext.params);\n}",
     "delete": false,
     "description": "Home page.",
     "get": true,

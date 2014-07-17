@@ -28,7 +28,7 @@ module.exports = function(grunt) {
     'mixdown-router': {
       options: {
         router_template: './test/fixture/browser/helper/router_template.js.tpl',
-        dest: './test/fixture/browser/router.js',
+        dest: './test/fixture/browser',
         paths: [{
           path: './test/fixture/controllers/api_v1',
           url_prefix: '/api/v1'

@@ -18,12 +18,12 @@ module.exports = Generator.extend({
     this._options.checkRoot = _.isBoolean(this._options.checkRoot) ? this._options.checkRoot : true; // default checkRoot config
     this.controllers = new ControllerFactory(options);
 
-    // bubble both events 
+    // bubble both events
     this.controllers.on('invalid-route', function(data) {
       self.emit('invalid-route', data);
     });
 
-    // bubble both events 
+    // bubble both events
     this.controllers.on('no-browser-handler', function(data) {
       self.emit('no-browser-handler', data);
     });
@@ -47,7 +47,8 @@ module.exports = Generator.extend({
   create: function() {
     return new Router({
       controllers: this.controllers,
-      timeout: this._options.timeout
+      timeout: this._options.timeout,
+      app: this._options.app
     });
   },
 
@@ -154,7 +155,7 @@ module.exports = Generator.extend({
   },
 
   // For browsers: attach to popstate and perform initial navigate match
-  listen: function() {
+  listen: function(callback) {
     var self = this;
 
     // Build a URL string for navigating w/o hash or additional search params

@@ -34,6 +34,15 @@ module.exports = Generator.extend({
   clientRouter: null,
   root: typeof(window) !== 'undefined' && window.location ? window.location.pathname : null,
 
+  authenticate: function(httpContext, callback) {
+
+    httpContext.user = {
+      is_logged_in: false
+    };
+
+    callback(null, httpContext);
+  },
+
   hasPushState: function() {
     return !!(window.history && window.history.pushState);
   },
@@ -45,11 +54,14 @@ module.exports = Generator.extend({
 
   // creates a router instance. This is the single server side node interface.
   create: function() {
-    return new Router({
+    var new_router = new Router({
       controllers: this.controllers,
       timeout: this._options.timeout,
       app: this._options.app
     });
+
+    new_router._authenticate = this.authenticate;
+    return new_router;
   },
 
   // client side url navigation

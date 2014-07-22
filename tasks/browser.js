@@ -33,7 +33,7 @@ module.exports = function(grunt) {
       // Iterate and generate router plugin code.
       for (var route_name in cf.controllers) {
         if (cf.controllers[route_name].manifest().browser) {
-          handlers.push(route_name + ': require("' + cf.controllers[route_name].dir_path + '/browser_handler.js")');
+          handlers.push('"' + route_name + '": require("' + cf.controllers[route_name].dir_path + '/browser_handler.js")');
         }
       }
 

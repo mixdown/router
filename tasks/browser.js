@@ -1,6 +1,7 @@
 var ControllerFactory = require('../lib/controller_factory.js');
 var fs = require('fs');
 var path = require('path');
+var _ = require('lodash');
 
 module.exports = function(grunt) {
 
@@ -43,7 +44,15 @@ module.exports = function(grunt) {
       // Write the destination file.
       grunt.file.write(path.join(options.dest, 'router.js'), src_router);
 
-      var src_manifest = 'module.exports = ' + JSON.stringify(cf.manifest()) + ';';
+      var manifest = cf.manifest();
+      _.each(manifest, function(m) {
+        _.each(m.params, function(p) {
+          if (p.regex instanceof RegExp) {
+            p.regex = p.regex.source;
+          }
+        });
+      });
+      var src_manifest = 'module.exports = ' + JSON.stringify(manifest) + ';';
       grunt.file.write(path.join(options.dest, 'manifest.js'), src_manifest);
 
       done();

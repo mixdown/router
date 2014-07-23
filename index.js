@@ -117,7 +117,7 @@ module.exports = Generator.extend({
     this.emit('navigate', newUrl);
 
     // old school url change for browsers w/o pushstate or without the polyfill.
-    if (!this.hasPushState) {
+    if (!this.hasPushState()) {
       window.location.href = url.format(newUrl);
       return;
     }
@@ -138,7 +138,7 @@ module.exports = Generator.extend({
       if (httpContext.url.href !== window.location.href) {
 
         // html5-history-api should be used to support pushState with hashbangs
-        if (self._hasPushState) {
+        if (self.hasPushState()) {
           window.history.pushState({}, document.title, httpContext.url.href);
 
           // if html5-history-api not loaded, then do an old school href assign.

@@ -76,6 +76,10 @@ module.exports = Generator.extend({
   navigate: function(route, params, callback) {
     var self = this;
 
+    if (!route) {
+      return callback(new Error('Route not defined.'));
+    }
+
     // handle 2 arg variant function signatures.
     if (arguments.length === 2) {
       var arg1 = arguments[1];

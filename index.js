@@ -48,8 +48,24 @@ module.exports = Generator.extend({
   },
 
   // Functions that use the route table and controller manifest.
-  manifest: function() {
-    return this.controllers.manifest();
+  manifest: function(sanitize) {
+    if (sanitize) {
+
+      var manifestCopy = _.cloneDeep(this.controllers.manifest());
+
+      _.each(manifestCopy, function(m, name) {
+        _.each(m.params, function(p) {
+          if (typeof(p.regex) !== 'string' && p.regex.source) {
+            p.regex = p.regex.source;
+          }
+        });
+      });
+
+      return manifestCopy;
+
+    } else {
+      return this.controllers.manifest();
+    }
   },
 
   // creates a router instance. This is the single server side node interface.

@@ -19,6 +19,7 @@
   ],
   "dependencies": {
     "async": "^0.9.0",
+    "express-useragent": "^0.1.0",
     "formidable": "^1.0.15",
     "hammock": "^0.1.9",
     "lodash": "^2.4.1",

@@ -25,7 +25,7 @@
     "lodash": "^2.4.1",
     "mixdown-app": "^3.0.4",
     "mkdirp": "^0.5.0",
-    "uuid-lib": "0.0.6"
+    "node-uuid": "^1.4.1"
   },
   "devDependencies": {
     "browserify": "^4.2.1",

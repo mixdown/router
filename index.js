@@ -37,7 +37,7 @@ module.exports = Generator.extend({
   authenticate: function(httpContext, callback) {
 
     httpContext.user = {
-      is_logged_in: false
+      logged_in: false
     };
 
     callback(null, httpContext);
@@ -77,6 +77,7 @@ module.exports = Generator.extend({
     });
 
     new_router._authenticate = this.authenticate;
+    new_router._authorize = this.authorize;
     return new_router;
   },
 

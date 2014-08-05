@@ -214,14 +214,14 @@ module.exports = Generator.extend({
       var body = httpContext.response.buffer.join('');
 
       if (httpContext.response.statusCode != 200) {
-        return callback(new Error('Response failed: ' + httpContext.response.statusCode), res, body);
+        return callback(new Error('Response failed: ' + httpContext.response.statusCode), httpContext.response, body);
       }
 
       if (/json/.test(httpContext.response.getHeader('Content-Type'))) {
         try {
           body = JSON.parse(body);
         } catch (e) {
-          return callback(e, res, body);
+          return callback(e, httpContext.response, body);
         }
       }
 

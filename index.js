@@ -6,6 +6,7 @@ var Generator = require('./lib/generator.js');
 var events = require('events');
 var MockRequest = require('hammock').Request;
 var MockResponse = require('hammock').Response;
+var HttpContext = require('./lib/http_context.js');
 
 module.exports = Generator.extend({
 
@@ -185,6 +186,51 @@ module.exports = Generator.extend({
     this.clientRouter.dispatch(req, res);
 
     return req;
+  },
+
+  // Used to call a controller within another controller.
+  tunnel: function(route, params, parentContext, callback) {
+    var controller = this.controllers.controllers[route];
+
+    if (!controller) {
+      return callback(new Error('No controller for route name - ' + route));
+    }
+
+    var httpContext = new HttpContext(
+      new MockRequest({
+        url: this.url(route, params)
+      }),
+      new MockResponse()
+    );
+
+    httpContext.app = parentContext.app;
+    httpContext.id = parentContext.id;
+    httpContext.user = parentContext.user;
+    httpContext.user_agent = parentContext.user_agent;
+
+    controller.parse(httpContext);
+
+    httpContext.response.on('finish', function() {
+      var body = httpContext.response.buffer.join('');
+
+      if (httpContext.response.statusCode != 200) {
+        return callback(new Error('Response failed: ' + httpContext.response.statusCode), res, body);
+      }
+
+      if (/json/.test(httpContext.response.getHeader('Content-Type'))) {
+        try {
+          body = JSON.parse(body);
+        } catch (e) {
+          return callback(e, res, body);
+        }
+      }
+
+      callback(null, httpContext.response, body);
+
+    });
+
+    controller.handle(httpContext);
+
   },
 
   // For browsers: attach to popstate and perform initial navigate match

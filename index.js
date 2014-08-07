@@ -8,6 +8,8 @@ var MockRequest = require('hammock').Request;
 var MockResponse = require('hammock').Response;
 var HttpContext = require('./lib/http_context.js');
 
+require('substr-polyfill');
+
 module.exports = Generator.extend({
 
   _namespace_default: 'router',
@@ -139,7 +141,7 @@ module.exports = Generator.extend({
     this.emit('navigate', newUrl);
 
     // old school url change for browsers w/o pushstate or without the polyfill.
-    if (!this.hasPushState()) {
+    if (this.initialized && !this.hasPushState()) {
       window.location.href = url.format(newUrl);
       return;
     }
@@ -264,7 +266,10 @@ module.exports = Generator.extend({
 
     }
 
-    self.navigate(getUrlString(), callback);
+    self.navigate(getUrlString(), function(err) {
+      self.initialized = true;
+      ((typeof(callback) === 'function' ? callback(err) : null));
+    });
   },
   _setup: function(done) {
     this.controllers.init(done);

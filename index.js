@@ -200,7 +200,7 @@ module.exports = Generator.extend({
 
     var httpContext = new HttpContext(
       new MockRequest({
-        url: this.url(route, params)
+        url: this.format(route, params)
       }),
       new MockResponse()
     );

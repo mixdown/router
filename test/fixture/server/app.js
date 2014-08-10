@@ -15,7 +15,8 @@ module.exports = function() {
       path: './test/fixture/controllers/pages',
       url_prefix: '',
       add_namespace: false
-    }]
+    }],
+    app: app
   }), 'router');
 
   // app.router.on('no-browser-handler', function(data) {

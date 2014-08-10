@@ -182,7 +182,17 @@ module.exports = Generator.extend({
 
     // fire callback once the handler has executed.  Note: javascript is async.  The handler might not be done when this callback is fired... but you already knew that!
     if (typeof(callback) === 'function') {
-      this.clientRouter.once('end', callback);
+      this.clientRouter.once('end', function() {
+
+        // these are here b/c EventEmitter.once() does not remove the event properly after it executes in
+        // older browsers (specifically IE8)
+        if (!self._hasPushState) {
+          _clientRouter.removeAllListeners('match');
+          _clientRouter.removeAllListeners('end');
+        }
+
+        return typeof(callback) === 'function' ? callback.apply(self, arguments) : null;
+      });
     }
 
     this.clientRouter.dispatch(req, res);

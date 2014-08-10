@@ -187,8 +187,8 @@ module.exports = Generator.extend({
         // these are here b/c EventEmitter.once() does not remove the event properly after it executes in
         // older browsers (specifically IE8)
         if (!self._hasPushState) {
-          _clientRouter.removeAllListeners('match');
-          _clientRouter.removeAllListeners('end');
+          self.clientRouter.removeAllListeners('match');
+          self.clientRouter.removeAllListeners('end');
         }
 
         return typeof(callback) === 'function' ? callback.apply(self, arguments) : null;

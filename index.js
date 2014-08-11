@@ -18,7 +18,6 @@ module.exports = Generator.extend({
     var self = this;
 
     this._super(options);
-    this._options.checkRoot = _.isBoolean(this._options.checkRoot) ? this._options.checkRoot : true; // default checkRoot config
     this.controllers = new ControllerFactory(options);
 
     // bubble both events
@@ -249,16 +248,6 @@ module.exports = Generator.extend({
   listen: function(callback) {
     var self = this;
 
-    // Build a URL string for navigating w/o hash or additional search params
-    var getUrlString = function() {
-      if (self._options.checkRoot) {
-        var loc = window.location;
-        return loc.protocol + '//' + loc.host + self.root + ((loc.hash) ? loc.hash.replace(routeStripper, '') : loc.search);
-      } else {
-        return window.location.href;
-      }
-    };
-
     if (this.hasPushState()) {
       // The popstate event - A popstate event is dispatched to the window every time the active history
       // entry changes. If the history entry being activated was created by a call to pushState or affected
@@ -271,12 +260,19 @@ module.exports = Generator.extend({
       // This is only true when the script is evaluated before the page is fully loaded.
       // This implies that the router is starting to listen before the DOM is completely ready.
       window.onpopstate = function(e) {
-        self.navigate(getUrlString());
+        var newUrl = url.parse(window.location.href);
+
+        // do not navigate to same url.  ignore hash since it should be a client side thing.
+        if (newUrl.pathname !== self.location.pathname ||
+          newUrl.search !== self.location.search) {
+
+          self.navigate(window.location.href);
+        }
       };
 
     }
 
-    self.navigate(getUrlString(), function(err) {
+    self.navigate(window.location.href, function(err) {
       self.initialized = true;
       ((typeof(callback) === 'function' ? callback(err) : null));
     });

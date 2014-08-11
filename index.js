@@ -115,6 +115,10 @@ module.exports = Generator.extend({
     // keep a single instance around in a browser.
     if (!this.clientRouter) {
       this.clientRouter = this.create();
+
+      this.clientRouter.on('error', function(err) {
+        console.log(err.stack);
+      });
     }
 
     var newUrl = null;
@@ -150,9 +154,6 @@ module.exports = Generator.extend({
     });
     var res = new MockResponse();
 
-    this.clientRouter.once('error', function(err) {
-      console.log(err.stack);
-    });
 
     // if the route was matched, then change the url.  This will change the url in the address bar before the handler runs.
     // This is good for devs for the situation where there is a problem with the controller handler which will cause the pipeline to stop.
@@ -180,19 +181,18 @@ module.exports = Generator.extend({
     });
 
     // fire callback once the handler has executed.  Note: javascript is async.  The handler might not be done when this callback is fired... but you already knew that!
-    if (typeof(callback) === 'function') {
-      this.clientRouter.once('end', function() {
+    this.clientRouter.once('end', function() {
 
-        // these are here b/c EventEmitter.once() does not remove the event properly after it executes in
-        // older browsers (specifically IE8)
-        if (!self._hasPushState) {
-          self.clientRouter.removeAllListeners('match');
-          self.clientRouter.removeAllListeners('end');
-        }
+      // these are here b/c EventEmitter.once() does not remove the event properly after it executes in
+      // older browsers (specifically IE8)
+      if (!self._hasPushState) {
+        self.clientRouter.removeAllListeners('match');
+        self.clientRouter.removeAllListeners('end');
+      }
 
-        return typeof(callback) === 'function' ? callback.apply(self, arguments) : null;
-      });
-    }
+      return typeof(callback) === 'function' ? callback.apply(self, arguments) : null;
+    });
+
 
     this.clientRouter.dispatch(req, res);
 

@@ -20,6 +20,10 @@ module.exports = Generator.extend({
     this._super(options);
     this.controllers = new ControllerFactory(options);
 
+    // cache the bound scope functions for use in router.create()
+    this.authenticate_cached = _.bind(this.authenticate, this);
+    this.authorize_cached = _.bind(this.authorize, this);
+
     // bubble both events
     this.controllers.on('invalid-route', function(data) {
       self.emit('invalid-route', data);
@@ -78,8 +82,8 @@ module.exports = Generator.extend({
       app: this._options.app
     });
 
-    new_router._authenticate = this.authenticate;
-    new_router._authorize = this.authorize;
+    new_router._authenticate = this.authenticate_cached;
+    new_router._authorize = this.authorize_cached;
     return new_router;
   },
 

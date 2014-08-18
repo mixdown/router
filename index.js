@@ -157,7 +157,6 @@ module.exports = Generator.extend({
 
         // if supports pushState, then use it.  if not, then the controllers will already have replaced location in browser.
         if (self.hasPushState() && httpContext.controller && httpContext.controller.browser) {
-          debugger;
           if (httpContext.url.pathname === window.location.pathname &&
             httpContext.url.search == window.location.search &&
             (httpContext.url.hash || '') == window.location.hash) {

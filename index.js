@@ -159,9 +159,8 @@ module.exports = Generator.extend({
     var res = new MockResponse();
 
 
-    // if the route was matched, then change the url.  This will change the url in the address bar before the handler runs.
-    // This is good for devs for the situation where there is a problem with the controller handler which will cause the pipeline to stop.
-    this.clientRouter.once('match', function(httpContext) {
+    // if the route was matched, then change the url.
+    this.clientRouter.once('end', function(httpContext) {
 
       if (httpContext.url.href !== window.location.href) {
 

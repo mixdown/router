@@ -135,16 +135,6 @@ module.exports = Generator.extend({
       newUrl = url.parse(route);
     }
 
-    // Test if this href is going to be the same as the current.
-    // If same, then return b/c there is no reason to re-route.
-    if (this.initialized &&
-      newUrl.pathname === loc.pathname &&
-      newUrl.search == loc.search &&
-      newUrl.hash == loc.hash
-    ) {
-      return null;
-    }
-
     this.emit('navigate', newUrl);
 
     // old school url change for browsers w/o pushstate or without the polyfill.
@@ -153,9 +143,10 @@ module.exports = Generator.extend({
       return;
     }
 
-    var req = new MockRequest({
+    var req_opt = {
       url: url.format(newUrl)
-    });
+    };
+    var req = new MockRequest(req_opt);
     var res = new MockResponse();
 
 
@@ -164,22 +155,26 @@ module.exports = Generator.extend({
 
       if (httpContext.url.href !== window.location.href) {
 
-        // html5-history-api should be used to support pushState with hashbangs
-        if (self.hasPushState()) {
-          window.history.pushState({}, document.title, httpContext.url.href);
+        // if supports pushState, then use it.  if not, then the controllers will already have replaced location in browser.
+        if (self.hasPushState() && httpContext.controller && httpContext.controller.browser) {
+          debugger;
+          if (httpContext.url.pathname === window.location.pathname &&
+            httpContext.url.search == window.location.search &&
+            (httpContext.url.hash || '') == window.location.hash) {
 
-          // if html5-history-api not loaded, then do an old school href assign.
-        } else {
-          window.location.href = httpContext.url.href;
-          return;
+            window.history.replaceState(req_opt, document.title, httpContext.url.href);
+          } else {
+            window.history.pushState(req_opt, document.title, httpContext.url.href);
+          }
         }
 
+      } else {
+
+        self.location = url.parse(window.location.href);
+
+        // emit page_loaded on all handler matches.
+        self.emit('page_loaded', httpContext);
       }
-
-      self.location = url.parse(window.location.href);
-
-      // emit page_loaded on all handler matches.
-      self.emit('page_loaded', httpContext);
 
     });
 
@@ -263,14 +258,7 @@ module.exports = Generator.extend({
       // This is only true when the script is evaluated before the page is fully loaded.
       // This implies that the router is starting to listen before the DOM is completely ready.
       window.onpopstate = function(e) {
-        var newUrl = url.parse(window.location.href);
-
-        // do not navigate to same url.  ignore hash since it should be a client side thing.
-        if (newUrl.pathname !== self.location.pathname ||
-          newUrl.search !== self.location.search) {
-
-          self.navigate(window.location.href);
-        }
+        self.navigate(e.state ? e.state.url : window.location.href);
       };
 
     }

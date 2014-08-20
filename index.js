@@ -157,6 +157,10 @@ module.exports = Generator.extend({
 
         // if supports pushState, then use it.  if not, then the controllers will already have replaced location in browser.
         if (self.hasPushState() && httpContext.controller && httpContext.controller.browser) {
+
+          // emit page_loaded on all handler matches.
+          self.emit('page_loaded', httpContext);
+
           if (httpContext.url.pathname === window.location.pathname &&
             httpContext.url.search == window.location.search &&
             (httpContext.url.hash || '') == window.location.hash) {
@@ -171,8 +175,6 @@ module.exports = Generator.extend({
 
         self.location = url.parse(window.location.href);
 
-        // emit page_loaded on all handler matches.
-        self.emit('page_loaded', httpContext);
       }
 
     });
@@ -264,6 +266,7 @@ module.exports = Generator.extend({
 
     self.navigate(window.location.href, function(err) {
       self.initialized = true;
+      self.emit('initialized');
       ((typeof(callback) === 'function' ? callback(err) : null));
     });
   },

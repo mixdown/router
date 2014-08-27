@@ -208,7 +208,8 @@ module.exports = Generator.extend({
 
     var httpContext = new HttpContext(
       new MockRequest({
-        url: this.format(route, params)
+        url: this.format(route, params),
+        method: parentContext.request.method
       }),
       new MockResponse()
     );
@@ -217,6 +218,7 @@ module.exports = Generator.extend({
     httpContext.id = parentContext.id;
     httpContext.user = parentContext.user;
     httpContext.user_agent = parentContext.user_agent;
+    httpContext.body = parentContext.body;
 
     controller.parse(httpContext);
 

@@ -106,6 +106,7 @@ var Router = function(namespace) {
               route.path, {
                 timeout: route.timeout
               },
+              route.formats,
               _.bind(handlers.constructor.prototype._baseHandler, app, handler, route)
             );
           } else {

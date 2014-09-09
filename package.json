@@ -19,7 +19,7 @@
   ],
   "dependencies": {
     "lodash": "~2.4.1",
-    "pipeline-router": "~1.2.5",
+    "pipeline-router": "~1.2.7",
     "hammock": "~0.1.5",
     "substr-polyfill": "*"
   },

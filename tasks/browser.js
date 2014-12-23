@@ -57,16 +57,49 @@ module.exports.gulpManifest = function(options) {
       code = err.stack;
     } else {
 
+      var code_buf = [];
+
       var manifest = cf.manifest();
       _.each(manifest, function(m) {
-        _.each(m.params, function(p) {
-          if (p.regex instanceof RegExp) {
-            p.regex = p.regex.source;
+        var cnt = 0;
+
+        s_buf = ['{'];
+
+        _.each(m, function(v, k) {
+
+          // convert params
+          if (k === 'params') {
+            _.each(v, function(p) {
+              if (p.regex instanceof RegExp) {
+                p.regex = p.regex.source;
+              }
+            });
           }
+
+          if (cnt++ > 0) {
+            s_buf.push(',');
+          }
+
+          s_buf.push('"' + k + '":');
+          if (typeof(v) === 'function') {
+            s_buf.push(v.toString());
+          } else if (typeof(v) === 'undefined') {
+            s_buf.push("null");
+          } else {
+            s_buf.push(JSON.stringify(v));
+          }
+
         });
+
+
+
+        s_buf.push('}');
+
+        code_buf.push('"' + m.name + '": ' + s_buf.join(''));
       });
 
-      code = 'module.exports = ' + JSON.stringify(manifest) + ';';
+      code = 'module.exports = {' + code_buf.join(',') + '};';
+
     }
 
     // write and end

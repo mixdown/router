@@ -40,6 +40,10 @@ module.exports = Generator.extend({
   clientRouter: null,
   root: typeof(window) !== 'undefined' && window.location ? window.location.pathname : null,
 
+  authorize: function(httpContext, callback) {
+    callback(null, httpContext);
+  },
+
   authenticate: function(httpContext, callback) {
 
     httpContext.user = {

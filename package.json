@@ -1,6 +1,6 @@
 {
   "name": "mixdown-router",
-  "version": "4.1.5",
+  "version": "4.1.6",
   "description": "Router for mixdown.js",
   "main": "index.js",
   "scripts": {

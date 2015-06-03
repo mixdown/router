@@ -2,11 +2,11 @@ var createApp = require('../fixture/server/app.js');
 var assert = require('assert');
 var _ = require('lodash');
 
-suite('Initialization', function() {
+suite('Initialization', function () {
 
   var app;
 
-  setup(function(done) {
+  setup(function (done) {
     if (app) {
       done();
     } else {
@@ -16,7 +16,7 @@ suite('Initialization', function() {
   });
 
 
-  test('Test url generation for rest params', function(done) {
+  test('Test url generation for rest params', function (done) {
     var params = {
       age: 6,
       gender: 'female',
@@ -31,12 +31,12 @@ suite('Initialization', function() {
     };
 
     assert.equal(uri.pathname, gold.pathname, 'Pathname should match the expected url.');
-    assert.equal(uri.query, null, 'Query should not exist.');
+    assert.deepEqual(Object.keys(uri.query), [], 'Query should not exist.');
     assert.equal(url, gold.pathname, 'Formatted url should match expected value.');
     done();
   });
 
-  test('Test url generation for query params', function(done) {
+  test('Test url generation for query params', function (done) {
     var params = {
       hidePictures: true,
       id: 1234

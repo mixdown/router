@@ -14,7 +14,7 @@ module.exports = Generator.extend({
 
   _namespace_default: 'router',
 
-  init: function(options) {
+  init: function (options) {
     var self = this;
 
     this._super(options);
@@ -25,12 +25,12 @@ module.exports = Generator.extend({
     this.authorize_cached = _.bind(this.authorize, this);
 
     // bubble both events
-    this.controllers.on('invalid-route', function(data) {
+    this.controllers.on('invalid-route', function (data) {
       self.emit('invalid-route', data);
     });
 
     // bubble both events
-    this.controllers.on('no-browser-handler', function(data) {
+    this.controllers.on('no-browser-handler', function (data) {
       self.emit('no-browser-handler', data);
     });
 
@@ -38,13 +38,13 @@ module.exports = Generator.extend({
 
   controllers: null,
   clientRouter: null,
-  root: typeof(window) !== 'undefined' && window.location ? window.location.pathname : null,
+  root: typeof (window) !== 'undefined' && window.location ? window.location.pathname : null,
 
-  authorize: function(httpContext, callback) {
+  authorize: function (httpContext, callback) {
     callback(null, httpContext);
   },
 
-  authenticate: function(httpContext, callback) {
+  authenticate: function (httpContext, callback) {
 
     httpContext.user = {
       logged_in: false
@@ -53,19 +53,19 @@ module.exports = Generator.extend({
     callback(null, httpContext);
   },
 
-  hasPushState: function() {
+  hasPushState: function () {
     return !!(window.history && window.history.pushState);
   },
 
   // Functions that use the route table and controller manifest.
-  manifest: function(sanitize) {
+  manifest: function (sanitize) {
     if (sanitize) {
 
       var manifestCopy = _.cloneDeep(this.controllers.manifest());
 
-      _.each(manifestCopy, function(m, name) {
-        _.each(m.params, function(p) {
-          if (typeof(p.regex) !== 'string' && p.regex.source) {
+      _.each(manifestCopy, function (m, name) {
+        _.each(m.params, function (p) {
+          if (typeof (p.regex) !== 'string' && p.regex.source) {
             p.regex = p.regex.source;
           }
         });
@@ -79,7 +79,7 @@ module.exports = Generator.extend({
   },
 
   // creates a router instance. This is the single server side node interface.
-  create: function() {
+  create: function () {
     var new_router = new Router({
       controllers: this.controllers,
       timeout: this._options.timeout,
@@ -100,7 +100,7 @@ module.exports = Generator.extend({
   //
   // 2. function(url, callback)
   // @param url {Object|String}: Can be url string or node url object.
-  navigate: function(route, params, callback) {
+  navigate: function (route, params, callback) {
     var self = this;
 
     if (!route) {
@@ -111,7 +111,7 @@ module.exports = Generator.extend({
     if (arguments.length === 2) {
       var arg1 = arguments[1];
 
-      if (typeof(arg1) === 'function') {
+      if (typeof (arg1) === 'function') {
         callback = arg1;
         params = null;
       } else {
@@ -124,7 +124,7 @@ module.exports = Generator.extend({
     if (!this.clientRouter) {
       this.clientRouter = this.create();
 
-      this.clientRouter.on('error', function(err) {
+      this.clientRouter.on('error', function (err) {
         console.log(err.stack);
       });
     }
@@ -155,7 +155,7 @@ module.exports = Generator.extend({
 
 
     // if the route was matched, then change the url.
-    this.clientRouter.once('end', function(err, httpContext) {
+    this.clientRouter.once('end', function (err, httpContext) {
 
       if (httpContext.url.href !== window.location.href) {
 
@@ -184,7 +184,7 @@ module.exports = Generator.extend({
     });
 
     // fire callback once the handler has executed.  Note: javascript is async.  The handler might not be done when this callback is fired... but you already knew that!
-    this.clientRouter.once('end', function() {
+    this.clientRouter.once('end', function () {
 
       // these are here b/c EventEmitter.once() does not remove the event properly after it executes in
       // older browsers (specifically IE8)
@@ -193,7 +193,7 @@ module.exports = Generator.extend({
         self.clientRouter.removeAllListeners('end');
       }
 
-      return typeof(callback) === 'function' ? callback.apply(self, arguments) : null;
+      return typeof (callback) === 'function' ? callback.apply(self, arguments) : null;
     });
 
 
@@ -203,7 +203,7 @@ module.exports = Generator.extend({
   },
 
   // Used to call a controller within another controller.
-  tunnel: function(route, params, parentContext, callback) {
+  tunnel: function (route, params, parentContext, callback) {
     var controller = this.controllers.controllers[route];
 
     if (!controller) {
@@ -226,7 +226,7 @@ module.exports = Generator.extend({
 
     controller.parse(httpContext);
 
-    httpContext.response.on('finish', function() {
+    httpContext.response.on('finish', function () {
       var body = httpContext.response.buffer.join('');
 
       if (httpContext.response.statusCode != 200) {
@@ -250,7 +250,7 @@ module.exports = Generator.extend({
   },
 
   // For browsers: attach to popstate and perform initial navigate match
-  listen: function(callback) {
+  listen: function (callback) {
     var self = this;
 
     if (this.hasPushState()) {
@@ -264,19 +264,19 @@ module.exports = Generator.extend({
       // Previous comment - "WebKit-based browsers fire onpopstate on page load.""
       // This is only true when the script is evaluated before the page is fully loaded.
       // This implies that the router is starting to listen before the DOM is completely ready.
-      window.onpopstate = function(e) {
+      window.onpopstate = function (e) {
         self.navigate(e.state ? e.state.url : window.location.href);
       };
 
     }
 
-    self.navigate(window.location.href, function(err) {
+    self.navigate(window.location.href, function (err) {
       self.initialized = true;
       self.emit('initialized');
-      ((typeof(callback) === 'function' ? callback(err) : null));
+      ((typeof (callback) === 'function' ? callback(err) : null));
     });
   },
-  _setup: function(done) {
+  _setup: function (done) {
     this.controllers.init(done);
   }
 });

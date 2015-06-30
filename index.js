@@ -223,6 +223,7 @@ module.exports = Generator.extend({
     httpContext.user = parentContext.user;
     httpContext.user_agent = parentContext.user_agent;
     httpContext.body = parentContext.body;
+    httpContext.files = parentContext.files;
     httpContext.controller = controller;
 
     controller.parse(httpContext);

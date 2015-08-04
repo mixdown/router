@@ -155,7 +155,7 @@ module.exports = Generator.extend({
 
 
     // if the route was matched, then change the url.
-    this.clientRouter.once('end', function (err, httpContext) {
+    this.clientRouter.once('match', function (httpContext) {
 
       if (httpContext.url.href !== window.location.href) {
 

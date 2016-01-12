@@ -71,4 +71,19 @@ suite('Initialization', function () {
   });
 
 
+  test('Test url generation for query params where param is 0', function (done) {
+    var params = {
+      limit: 0,
+      hidePictures: false
+    };
+
+    var url = app.router.format('api_v2/dogs_search', params);
+    var goldUrl = '/api_v2/dogs?hidePictures=false&limit=0';
+
+    console.log(url);
+
+    assert.equal(url, goldUrl, 'Formatted url should match expected value.');
+    done();
+  });
+
 });

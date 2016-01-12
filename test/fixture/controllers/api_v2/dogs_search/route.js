@@ -19,9 +19,21 @@ module.exports = {
       regex: "(\\d+)",
       kind: "rest",
       enabled: true
+    },
+    "hidePictures": {
+      "enabled": true,
+      "kind": "query",
+      "name": "hidePictures",
+      "regex": "(true|false)"
+    },
+    "limit": {
+      "enabled": true,
+      "kind": "query",
+      "name": "limit",
+      "regex": "(\\d+)"
     }
   },
-  get: function(httpContext) {
+  get: function (httpContext) {
     var res = httpContext.response;
     var data = dogList.search(httpContext.params.age, httpContext.params.gender, httpContext.params.bark);
 
@@ -31,7 +43,7 @@ module.exports = {
     res.end(JSON.stringify(data));
   },
 
-  post: function(httpContext) {
+  post: function (httpContext) {
     httpContext.response.end('Not Supported.');
   }
 };

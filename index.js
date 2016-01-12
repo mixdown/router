@@ -1,299 +1,284 @@
 var _ = require('lodash');
-var plRouter = require('pipeline-router');
-var util = require('util');
+var ControllerFactory = require('./lib/controller_factory.js');
+var Router = require('./lib/router.js');
 var url = require('url');
-var querystring = require('querystring');
 var Generator = require('./lib/generator.js');
+var events = require('events');
 var MockRequest = require('hammock').Request;
 var MockResponse = require('hammock').Response;
-var EventEmitter = require('events').EventEmitter;
+var HttpContext = require('./lib/http_context.js');
 
-// Load polyfill for url.js bug regarding substr(-1)
 require('substr-polyfill');
 
-if (typeof(global) === 'undefined') {
-  var global = typeof(window) === 'undefined' ? {} : window;
-}
+module.exports = Generator.extend({
 
-var Router = function(namespace) {
-  namespace = namespace || 'router';
-  var instance = this;
+  _namespace_default: 'router',
 
-  /**
-   * Attaches a router plugin to an application.
-   *
-   **/
-  this.attach = function(options) {
-    var app = options.app;
-    var handlers = options.handlers || instance;
+  init: function (options) {
+    var self = this;
 
-    // Cached regex for stripping a leading hash/slash and trailing space.
-    var routeStripper = /^[#\/]+|\s+$/g;
+    this._super(options);
+    this.controllers = new ControllerFactory(options);
 
-    // Cached regex for stripping leading and trailing slashes.
-    var rootStripper = /^\/+|\/+$/g;
+    // cache the bound scope functions for use in router.create()
+    this.authenticate_cached = _.bind(this.authenticate, this);
+    this.authorize_cached = _.bind(this.authorize, this);
 
-    // Cached regex for removing a trailing slash.
-    var trailingSlash = /\/$/;
+    // bubble both events
+    this.controllers.on('invalid-route', function (data) {
+      self.emit('invalid-route', data);
+    });
 
-    // attach EventEmitter interface
-    var self = this[namespace] = new EventEmitter();
+    // bubble both events
+    this.controllers.on('no-browser-handler', function (data) {
+      self.emit('no-browser-handler', data);
+    });
 
-    // attach the generator part of the router.
-    Generator.constructor.call(instance, namespace);
-    Generator.prototype.attach.call(this, options);
+  },
 
-    var self = this[namespace];
-    var _clientRouter = null;
+  controllers: null,
+  clientRouter: null,
+  root: typeof (window) !== 'undefined' && window.location ? window.location.pathname : null,
 
-    // attach the server side component
-    self.getHandler = function(key) {
-      // check object first.
-      // then check prototype.
-      return typeof(handlers[key]) === 'function' ? handlers[key] : handlers.constructor.prototype[key];
+  authorize: function (httpContext, callback) {
+    callback(null, httpContext);
+  },
+
+  authenticate: function (httpContext, callback) {
+
+    httpContext.user = {
+      logged_in: false
     };
 
-    /**
-     * Creates a new instance of router.
-     *
-     **/
-    self.create = function() {
-      var newRouter = new plRouter();
+    callback(null, httpContext);
+  },
 
-      // browser should never execute timeout.
-      if (typeof window !== 'undefined') {
-        newRouter.timeout = 0;
-      } else if (options.timeout) {
-        newRouter.timeout = options.timeout;
-      }
+  hasPushState: function () {
+    return !!(window.history && window.history.pushState);
+  },
 
-      var addParam = function(param, key) {
+  // Functions that use the route table and controller manifest.
+  manifest: function (sanitize) {
+    if (sanitize) {
 
-        if (param && param.regex) {
+      var manifestCopy = _.cloneDeep(this.controllers.manifest());
 
-          if (param.kind.toLowerCase() === "rest") {
-            newRouter.param(key, new RegExp(param.regex));
-          } else if (param.kind.toLowerCase() === 'query') {
-            newRouter.qparam(key, new RegExp(param.regex));
+      _.each(manifestCopy, function (m, name) {
+        _.each(m.params, function (p) {
+          if (typeof (p.regex) !== 'string' && p.regex.source) {
+            p.regex = p.regex.source;
           }
-        }
-      };
-
-      var routesWithBadHandlers = [];
-
-      // add routes
-      _.each(self.routes, function(route, key) {
-        // if a handler is specified, validate and bind it
-        if (route.handler) {
-          // if HTML history exists (we are in a browser) and the route is not set to be interpreted
-          // on the client, then we skip it.
-          if (!route.browser && global.history) {
-            return;
-          }
-
-          // add route-level params
-          if (route.params) {
-            _.each(route.params, addParam);
-          }
-
-          // check object first.
-          var handler = self.getHandler(route.handler);
-
-          // if we found the handler on the router, then bind it.
-          if (typeof(handler) === 'function') {
-            newRouter.use(
-              route.method,
-              route.path, {
-                timeout: route.timeout
-              },
-              _.bind(handlers.constructor.prototype._baseHandler, app, handler, route)
-            );
-          } else {
-            routesWithBadHandlers.push(route.name);
-          }
-        }
+        });
       });
 
-      if (routesWithBadHandlers.length !== 0) {
-        throw new Error('the following routes have invalid handlers: ' + routesWithBadHandlers.join(' '));
-      }
+      return manifestCopy;
 
-      return newRouter;
-    };
+    } else {
+      return this.controllers.manifest();
+    }
+  },
 
-    self.listen = function(callback) {
-      self._hasPushState = !! (window.history && window.history.pushState);
-      self.root = window.location.pathname;
-      self.checkRoot = _.isBoolean(options.checkRoot) ? options.checkRoot : true;
+  // creates a router instance. This is the single server side node interface.
+  create: function () {
+    var new_router = new Router({
+      controllers: this.controllers,
+      timeout: this._options.timeout,
+      app: this._options.app
+    });
 
-      // Build a URL string for navigating w/o hash or additional search params
-      var getUrlString = function() {
-        if (self.checkRoot) {
-          var loc = window.location;
-          return loc.protocol + '//' + loc.host + self.root + ((loc.hash) ? loc.hash.replace(routeStripper, '') : loc.search);
-        } else {
-          return window.location.href;
-        }
-      };
+    new_router._authenticate = this.authenticate_cached;
+    new_router._authorize = this.authorize_cached;
+    return new_router;
+  },
 
-      if (self._hasPushState) {
-        // The popstate event - A popstate event is dispatched to the window every time the active history
-        // entry changes. If the history entry being activated was created by a call to pushState or affected
-        // by a call to replaceState, the popstate event's state property contains a copy of the history
-        // entry's state object.
-        // https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history
-        // https://developer.mozilla.org/en-US/docs/Web/API/window.onpopstate
+  // client side url navigation
+  // 2 overloaded options
+  //
+  // 1. function(route, params, callback)
+  // @param route {String}: named route to generate the url.
+  // @param params {Object}: hash of params to send to url generation.
+  //
+  // 2. function(url, callback)
+  // @param url {Object|String}: Can be url string or node url object.
+  navigate: function (route, params, callback) {
+    var self = this;
 
-        // Previous comment - "WebKit-based browsers fire onpopstate on page load.""
-        // This is only true when the script is evaluated before the page is fully loaded.
-        // This implies that the router is starting to listen before the DOM is completely ready.
-        window.onpopstate = function(e) {
-          self.navigate(getUrlString());
-        };
+    if (!route) {
+      return callback(new Error('Route not defined.'));
+    }
 
-      }
+    // handle 2 arg variant function signatures.
+    if (arguments.length === 2) {
+      var arg1 = arguments[1];
 
-      self.navigate(getUrlString(), callback);
-    };
-
-    // client side url navigation
-    // 2 overloaded options
-    //
-    // 1. function(route, params, callback)
-    // @param route {String}: named route to generate the url.
-    // @param params {Object}: hash of params to send to url generation.
-    //
-    // 2. function(url, callback)
-    // @param url {Object|String}: Can be url string or node url object.
-    self.navigate = function(route, params, callback) {
-
-      // handle 2 arg variant function signatures.
-      if (arguments.length === 2) {
-        var arg1 = arguments[1];
-
-        if (typeof(arg1) === 'function') {
-          callback = arg1;
-          params = null;
-        } else {
-          callback = null;
-          params = arg1;
-        }
-      }
-
-      // keep a single instance around in a browser.
-      if (!_clientRouter) {
-        _clientRouter = self.create();
-      }
-
-      var newUrl = null;
-      var loc = self.location || url.parse(window.location.href);
-
-
-      // If the route is in the route table, then generate the url.  If not, check for hash or finally a literal url.
-      if (self.routes[route]) {
-        newUrl = app.plugins.router.url(route, params);
+      if (typeof (arg1) === 'function') {
+        callback = arg1;
+        params = null;
       } else {
-        var newUrl = url.parse(route);
+        callback = null;
+        params = arg1;
       }
+    }
 
-      // Test if this href is going to be the same as the current.
-      // If same, then return b/c there is no reason to re-route.
-      if (self.initialized &&
-        newUrl.pathname === loc.pathname &&
-        newUrl.search == loc.search &&
-        newUrl.hash == loc.hash
-      ) {
-        return null;
-      }
+    // keep a single instance around in a browser.
+    if (!this.clientRouter) {
+      this.clientRouter = this.create();
 
-      self.emit('navigate', newUrl);
-
-      // old school url change for browsers w/o pushstate or without the polyfill.
-      if (!self._hasPushState && self.initialized) {
-        window.location.href = url.format(newUrl);
-        return;
-      }
-
-      var req = new MockRequest({
-        url: url.format(newUrl)
+      this.clientRouter.on('error', function (err) {
+        console.log(err.stack);
       });
-      var res = new MockResponse();
+    }
 
-      // if the route was matched, then change the url.  This will change the url in the address bar before the handler runs.
-      // This is good for devs for the situation where there is a problem with the controller handler which will cause the pipeline to stop.
-      _clientRouter.once('match', function(routerData) {
-        var httpContext = routerData.httpContext;
+    var newUrl = null;
+    var loc = this.location || url.parse(window.location.href);
 
-        if (httpContext.url.href !== window.location.href) {
+    // If the route is in the route table, then generate the url.  If not, check for hash or finally a literal url.
+    if (this.manifest()[route]) {
+      newUrl = this.url(route, params);
+    } else {
+      newUrl = url.parse(route);
+    }
 
-          // html5-history-api should be used to support pushState with hashbangs
-          if (self._hasPushState) {
-            window.history.pushState({}, document.title, httpContext.url.href);
+    this.emit('navigate', newUrl);
 
-            // if html5-history-api not loaded, then do an old school href assign.
-          } else {
-            window.location.href = httpContext.url.href;
-          }
-
-        }
-
-        self.location = url.parse(window.location.href);
-
-        // emit page_loaded on all handler matches.
-        self.emit('page_loaded', routerData);
-
-      });
-
-      // fire callback once the handler has executed.  Note: javascript is async.  The handler might not be done when this callback is fired... but you already knew that!
-      _clientRouter.once('end', function(err, results) {
-
-        // these are here b/c EventEmitter.once() does not remove the event properly after it executes in
-        // older browsers (specifically IE8)
-        if (!self._hasPushState) {
-          _clientRouter.removeAllListeners('match');
-          _clientRouter.removeAllListeners('end');
-        }
-
-        typeof(callback) === 'function' ? callback(err, {
-          matched: results[0].matched,
-          res: res,
-          req: req
-        }) : null;
-
-      });
-
-
-      // fire async so that the req is pass to calling context.
-      // setTimeout(_clientRouter.dispatch.bind(_clientRouter, req, res), 5);
-      _clientRouter.dispatch(req, res);
-
-      self.initialized = true;
-      return req;
-    };
-  };
-
-  this.init = function(done) {
-    var self = this[namespace];
-    try {
-      var attempt = self.create();
-    } catch (err) {
-      done(err);
+    // old school url change for browsers w/o pushstate or without the polyfill.
+    if (this.initialized && !this.hasPushState()) {
+      window.location.href = url.format(newUrl);
       return;
     }
 
-    done(null, self);
-  };
-};
+    var req_opt = {
+      url: url.format(newUrl)
+    };
+    var req = new MockRequest(req_opt);
+    var res = new MockResponse();
 
-Router.prototype._baseHandler = function() {
-  var handler = arguments[0];
-  var route = arguments[1];
-  var httpContext = arguments[2];
 
-  httpContext.app = this;
-  httpContext.route = route;
+    // if the route was matched, then change the url.
+    this.clientRouter.once('match', function (httpContext) {
 
-  handler.call(this, httpContext);
-};
+      if (httpContext.url.href !== window.location.href) {
 
-module.exports = Router;
+        // if supports pushState, then use it.  if not, then the controllers will already have replaced location in browser.
+        if (self.hasPushState() && httpContext.controller && httpContext.controller.browser) {
+
+          // emit page_loaded on all handler matches.
+          self.emit('page_loaded', httpContext);
+
+          if (httpContext.url.pathname === window.location.pathname &&
+            httpContext.url.search == window.location.search &&
+            (httpContext.url.hash || '') == window.location.hash) {
+
+            window.history.replaceState(req_opt, document.title, httpContext.url.href);
+          } else {
+            window.history.pushState(req_opt, document.title, httpContext.url.href);
+          }
+        }
+
+      } else {
+
+        self.location = url.parse(window.location.href);
+
+      }
+
+    });
+
+    // fire callback once the handler has executed.  Note: javascript is async.  The handler might not be done when this callback is fired... but you already knew that!
+    this.clientRouter.once('end', function () {
+
+      // these are here b/c EventEmitter.once() does not remove the event properly after it executes in
+      // older browsers (specifically IE8)
+      if (!self._hasPushState) {
+        self.clientRouter.removeAllListeners('match');
+        self.clientRouter.removeAllListeners('end');
+      }
+
+      return typeof (callback) === 'function' ? callback.apply(self, arguments) : null;
+    });
+
+
+    this.clientRouter.dispatch(req, res);
+
+    return req;
+  },
+
+  // Used to call a controller within another controller.
+  tunnel: function (route, params, parentContext, callback) {
+    var controller = this.controllers.controllers[route];
+
+    if (!controller) {
+      return callback(new Error('No controller for route name - ' + route));
+    }
+
+    var httpContext = new HttpContext(
+      new MockRequest({
+        url: this.format(route, params),
+        method: parentContext.request.method
+      }),
+      new MockResponse()
+    );
+
+    httpContext.app = parentContext.app;
+    httpContext.id = parentContext.id;
+    httpContext.user = parentContext.user;
+    httpContext.user_agent = parentContext.user_agent;
+    httpContext.body = parentContext.body;
+    httpContext.files = parentContext.files;
+    httpContext.controller = controller;
+
+    controller.parse(httpContext);
+
+    httpContext.response.on('finish', function () {
+      var body = httpContext.response.buffer.join('');
+
+      if (httpContext.response.statusCode != 200) {
+        return callback(new Error('Response failed: ' + httpContext.response.statusCode), httpContext.response, body);
+      }
+
+      if (/json/.test(httpContext.response.getHeader('Content-Type'))) {
+        try {
+          body = JSON.parse(body);
+        } catch (e) {
+          return callback(e, httpContext.response, body);
+        }
+      }
+
+      callback(null, httpContext.response, body);
+
+    });
+
+    controller.handle(httpContext);
+
+  },
+
+  // For browsers: attach to popstate and perform initial navigate match
+  listen: function (callback) {
+    var self = this;
+
+    if (this.hasPushState()) {
+      // The popstate event - A popstate event is dispatched to the window every time the active history
+      // entry changes. If the history entry being activated was created by a call to pushState or affected
+      // by a call to replaceState, the popstate event's state property contains a copy of the history
+      // entry's state object.
+      // https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history
+      // https://developer.mozilla.org/en-US/docs/Web/API/window.onpopstate
+
+      // Previous comment - "WebKit-based browsers fire onpopstate on page load.""
+      // This is only true when the script is evaluated before the page is fully loaded.
+      // This implies that the router is starting to listen before the DOM is completely ready.
+      window.onpopstate = function (e) {
+        self.navigate(e.state ? e.state.url : window.location.href);
+      };
+
+    }
+
+    self.navigate(window.location.href, function (err) {
+      self.initialized = true;
+      self.emit('initialized');
+      ((typeof (callback) === 'function' ? callback(err) : null));
+    });
+  },
+  _setup: function (done) {
+    this.controllers.init(done);
+  }
+});

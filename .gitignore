@@ -13,3 +13,7 @@ results
 
 npm-debug.log
 node_modules
+test/fixture/browser/main.js
+test/fixture/browser/router.js
+tmp
+

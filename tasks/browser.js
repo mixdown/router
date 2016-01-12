@@ -3,7 +3,7 @@ var fs = require('fs');
 var _ = require('lodash');
 var through = require('through2');
 
-module.exports.gulpRouter = function(options) {
+module.exports.gulpRouter = function (options) {
 
   _.defaults(options, {
     router_template: require.resolve('./router_template.js.tpl')
@@ -16,7 +16,7 @@ module.exports.gulpRouter = function(options) {
   var stream = through.obj();
 
   // init controllers which crawls and builds manifest
-  cf.init(function(err) {
+  cf.init(function (err) {
     var code;
 
     if (err) {
@@ -43,14 +43,28 @@ module.exports.gulpRouter = function(options) {
   return stream;
 };
 
-module.exports.gulpManifest = function(options) {
+var omit_key_evaluator = function (output_keys) {
+  var whitelist_keys = [];
+
+  if (Array.isArray(output_keys)) {
+    whitelist_keys = output_keys;
+  }
+
+  return function (key) {
+    return whitelist_keys.length > 0 && whitelist_keys.indexOf(key) === -1;
+  };
+};
+
+/* output_keys {Array}: list of keys to emit in each manifest entry.  Allows caller to include/omit fields in manifest output */
+module.exports.gulpManifest = function (options, output_keys) {
 
   // ControllerFactory generates the controllers from config.
   var cf = new ControllerFactory(options || {});
   var stream = through.obj();
+  var should_omit_key = omit_key_evaluator(output_keys);
 
   // init controllers which crawls and builds manifest
-  cf.init(function(err) {
+  cf.init(function (err) {
     var code;
 
     if (err) {
@@ -60,16 +74,20 @@ module.exports.gulpManifest = function(options) {
       var code_buf = [];
 
       var manifest = cf.manifest();
-      _.each(manifest, function(m) {
+      _.each(manifest, function (m) {
         var cnt = 0;
 
         s_buf = ['{'];
 
-        _.each(m, function(v, k) {
+        _.each(m, function (v, k) {
+
+          if (should_omit_key(k)) {
+            return;
+          }
 
           // convert params
           if (k === 'params') {
-            _.each(v, function(p) {
+            _.each(v, function (p) {
               if (p.regex instanceof RegExp) {
                 p.regex = p.regex.source;
               }
@@ -81,9 +99,9 @@ module.exports.gulpManifest = function(options) {
           }
 
           s_buf.push('"' + k + '":');
-          if (typeof(v) === 'function') {
+          if (typeof (v) === 'function') {
             s_buf.push(v.toString());
-          } else if (typeof(v) === 'undefined') {
+          } else if (typeof (v) === 'undefined') {
             s_buf.push("null");
           } else {
             s_buf.push(JSON.stringify(v));

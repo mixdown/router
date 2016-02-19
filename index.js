@@ -267,7 +267,13 @@ module.exports = Generator.extend({
       // This is only true when the script is evaluated before the page is fully loaded.
       // This implies that the router is starting to listen before the DOM is completely ready.
       window.onpopstate = function (e) {
-        self.navigate(e.state ? e.state.url : window.location.href);
+        var state = e.state || {};
+        var new_url = state.url;
+        self.navigate(new_url || window.location.href, function (err) {
+          if (err) {
+            window.location.reload();
+          }
+        });
       };
 
     }
